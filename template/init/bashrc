@@ -1,13 +1,114 @@
 #######################################
-#PERSONAL CUSTOMIZATION BELOW THIS LINE
+# MY BASHRC
 #######################################
 
+
+########
+#  FUNCTIONS
+########
+
+# gvim wrapper
+function gvimt() {
+
+	/usr/bin/gvim --servername "GVIM-${tty}" --remote-tab-silent $* 2> /dev/null
+}
+
+## git operation related
+function gpull()
+{
+    SRC_TOP=$(pwd | awk -Fhwdiags '{print $1}')hwdiags
+    if [ -z ${SRC_TOP} ] ; then echo "set SRC_TOP directory"; exit; fi
+    if ! [ -d ${SRC_TOP}/../mods ]; then mkdir -p ${SRC_TOP}/../mods; fi
+    
+    cd ${SRC_TOP}
+    datestr=$(date +%m%d%y-%H%M)
+    echo "git pull > ${SRC_TOP}/../mods/mods.${datestr}"
+    git pull > ${SRC_TOP}/../mods/mods.${datestr}
+    if [ $? -ne 0 ] ; then echo "*** ERROR: git pull failed ";  fi
+    cat ${SRC_TOP}/../mods/mods.${datestr}
+    cd -    
+}
+
+function gdiffcommit()
+{
+    SRC_TOP=$(pwd | awk -Fssr '{print $1}')ssr
+    if [ -z ${SRC_TOP} ] ; then echo "set SRC_TOP directory"; exit; fi
+    if ! [ -d ${SRC_TOP}/../diffs ]; then mkdir -p ${SRC_TOP}/../diffs; fi
+
+    cd ${SRC_TOP}
+    datestr=$(date +%m%d%y-%H%M)
+    echo "git diff --name-status origin integration | tee /home/evadkan/gitlog/git.files.${datestr}"
+    git diff --name-status origin integration | tee /home/evadkan/gitlog/git.files.${datestr}
+}
+
+function gdiff()
+{
+    SRC_TOP=$(pwd | awk -Fssr '{print $1}')ssr
+    if [ -z ${SRC_TOP} ] ; then echo "set SRC_TOP directory"; exit; fi
+    if ! [ -d ${SRC_TOP}/../diffs ]; then mkdir -p ${SRC_TOP}/../diffs; fi
+
+    cd ${SRC_TOP}
+    datestr=$(date +%m%d%y-%H%M)
+    echo "git diff --name-status origin/integration | tee /home/evadkan/gitlog/git.files.${datestr}"
+    git diff --name-status origin/integration | tee /dev/null
+    git diff --name-only origin/integration > /home/evadkan/gitlog/git.files.${datestr}
+}
+
+
+
+function gdiffview()
+{
+    SRC_TOP=$(pwd | awk -Fssr '{print $1}')ssr
+    if [ -z ${SRC_TOP} ] ; then echo "set SRC_TOP directory"; exit; fi
+
+    cd ${SRC_TOP}
+    git diff --name-only origin/integration | tee /dev/null
+    diff_files=$(git diff --name-only origin/integration)
+    for file in ${diff_files}
+    do
+        echo Diffing... git difftool -y -t gvimdiff origin/integration $file;
+        git difftool -y -t gvimdiff origin/integration $file 2> /dev/null
+    done
+}
+
+function gdiffbkp()
+{
+    SRC_TOP=$(pwd | awk -Fssr '{print $1}')ssr
+    if [ -z ${SRC_TOP} ] ; then echo "set SRC_TOP directory"; exit; fi
+    
+    cd ${SRC_TOP}
+    datestr=$(date +%m%d%y-%H%M)
+    if ! [ -d ${SRC_TOP}/../mods/Changes.${datestr} ]; then mkdir -p ${SRC_TOP}/../mods/Changes.${datestr}; fi
+
+    git diff --name-only origin/integration | tee /dev/null
+    diff_files=$(git diff --name-only origin/integration)
+    for file in ${diff_files}
+    do
+        echo "ls $file | cpio -pmd ${SRC_TOP}/../mods/Changes.${datestr}"
+        ls $file | cpio -pmd ${SRC_TOP}/../mods/Changes.${datestr}
+    done
+
+    git diff origin/integration > ${SRC_TOP}/../mods/Changes.${datestr}/gitdiff.patch
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+###########
+##  PERSONALIZATION
+############
+
 #setting PATH Variable
-export PATH=$PATH:/app/cscope/15.8a/LMWP3/bin
-export PATH=$PATH:/app/perl/5.8.9/bin
-export PATH=/tools/swdev/bin:/home/evadkan/scripts/bin:/home/edagils/bin:/project/diags/wolf/scripts/20130726:$PATH
-# Anaconda python3.4
-export PATH=$PATH:/project/pcb/evadkan/python/anaconda3/bin:$PATH
+export PATH=$PATH:/home/pico/anaconda3/bin/
 
 export SHELL=/bin/bash
 #export DISPLAY=xl-sj1-14.sj.<PLATFORM>.com:32.0
@@ -33,14 +134,12 @@ export PS1="[\u@\h \W]\$"
 export PROMPT_COMMAND='echo -ne "\033]0;${PWD} [${USER}($)@${HOSTNAME}]\007"'
 
 #set CVSROOT
-#export CVSROOT=:pserver:<USER>m@cvsps-sj1-1.sj.<PLATFORM>.com:/projects/ntsw-cvs/swcvs/athena
-#export CVSROOT=:pserver:<USER>m@cvsps-sj1-4.sj.<PLATFORM>.com:/projects/ntsw-cvs2/swcvs4/minerva
-#export CVSROOT=:pserver:cvsps-sj1-6.sj.<PLATFORM>.com:/projects/ntsw-cvs2/swcvs4/minerva
 export CVSROOT=/project/network/CVSROOT
 export CVSEDITOR=vi
 
-export LM_LICENSE_FILE=1769@esekilx1001.rnd.ki.sw.license.com
-export VCS_LIC_EXPIRE_WARNING=1
+# Set License Servers
+#export LM_LICENSE_FILE=1769@esekilx1001.rnd.ki.sw.license.com
+#export VCS_LIC_EXPIRE_WARNING=1
 
 #vncserver -geometry 1920x1080
 #vncserver -geometry 1600x890
@@ -49,9 +148,7 @@ export VCS_LIC_EXPIRE_WARNING=1
 export CSCOPEVER=OS
 export CSCOP_DB=
 export CSCOPE_EDITOR=gvimt
-#export LD_LIBRARY_PATH=/tools/oss/local/x86_64-rhel4/lib:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH=/tools/oss/local/x86_64-rhel4/lib64:${LD_LIBRARY_PATH}
-export vlab=/home/labguy/boot/<USER>m
+#export LD_LIBRARY_PATH=
 
 export GV="`uname -n`-`tty`"
 alias rm='rm -iv'
@@ -59,23 +156,24 @@ alias cp='cp -iv'
 alias mv='mv -iv'
 alias ls='ls -F'
 alias lt="ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'"
-#alias tre='tree -l -L 1'
-alias tre="find . -maxdepth 3 -type d | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'"
+alias tre='tree -l -L 1'
+#alias tre="find . -maxdepth 3 -type d | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'"
 
 # email < file
-alias email='sendmail <USER>@email.com'
+alias email='sendmail vadivel@email.com'
 
 
-alias cscope='/app/cscope/15.8a/LMWP3/bin/cscope -p4 -dq'
+alias cscope='/usr/bin/cscope -p4 -dq'
 #alias cscope='export CSCOPE_DB=/scartch/51/evadkan/cscope/cscope.out;cscope -p4 -dq'
 alias tid='/usr/local/bin/lid -Rgrep -s'
-#alias gvim='/projects/ntsw-sw4/home/<USER>m/Install/bin/gvim -u /projects/ntsw-sw4/home/<USER>m/Install/bin/.vimrc --servername GVIM-`tty` --remote-tab-silent'
-#alias vi='/projects/ntsw-sw4/home/<USER>m/Install/bin/gvim -u /projects/ntsw-sw4/home/<USER>m/Install/bin/.vimrc --servername GVIM-`tty` --remote-tab-silent'
-alias vi=gvimt                                                             
-alias vimain='/tools/bin/gvim --servername GVIM-MAIN --remote-tab-silent'
-alias vimain1='/tools/bin/gvim --servername GVIM-MAIN1 --remote-tab-silent'
+#alias gvim='/projects/ntsw-sw4/home/vadivelm/Install/bin/gvim -u /projects/ntsw-sw4/home/vadivelm/Install/bin/.vimrc --servername GVIM-`tty` --remote-tab-silent'
+#alias vi='/projects/ntsw-sw4/home/vadivelm/Install/bin/gvim -u /projects/ntsw-sw4/home/vadivelm/Install/bin/.vimrc --servername GVIM-`tty` --remote-tab-silent'
+
+alias vi='gvimt'
+alias vimain='/usr/bin/gvim --servername GVIM-MAIN --remote-tab-silent'
+alias vimain1='/usr/bin/gvim --servername GVIM-MAIN1 --remote-tab-silent'
            
-alias ddd='/app/ddd/3.3.12/RHEL6/bin/ddd'
+alias ddd='/usr/bin/ddd'
 alias dddppc='ddd --debugger /projects/ntsw-sw3/linux/wrslinux_2.0/gto/glibc_std/host-cross/powerpc-wrs-linux-gnu/x86-linux2/powerpc-wrs-linux-gnu-ppc_e500v2-glibc_std-gdb'
 alias gdbtui='gdb -tui'
 # gdbserver <targetip>:<port> [elf file]
@@ -100,53 +198,11 @@ alias css='cscope -d  -f${CSCOPE_OUT} -c  -L -5 '
 alias cssr='cscope -d  -f${CSCOPE_OUT} -c  -L -6 '
 alias csc='cscope -d  -f${CSCOPE_OUT} -c  -L -3 '
                                      
-alias sdkw='export SDK=/projects/ntsw-sw3/home/<USER>m/sdktr3/sdk; cd $SDK'
-alias sdktot='export SDK=/projects/ntsw-sw3/home/<USER>m/sdktr3/sdktot; cd $SDK'
-alias mdk='export MDK=/projects/ntsw-sw4/home/<USER>m/mdk22tot/sdk6; export SDK=/projects/ntsw-sw7/home/<USER>m/sdktr3/sdktot; cd $MDK'
-alias sdk510='export SDK=/projects/ntsw-sw3/home/<USER>m/sdktr3-510/sdk; cd $SDK'
-alias sdk60='export SDK=/projects/ntsw-sw3/home/<USER>m/sdktr3/sdk; cd $SDK'
-alias sdkc='export SDK=`pwd`'
-
-##############
-# Windriver
-##############
-
-#/app/workbench/3.3.5/LMWP3/maintanence/wrInstaller/x86-linux2
-
-#T2080 
-#/app/vbuild/RHEL6-i686/workbench/3.3.5.2
-#Board File: /afs/sunrise.<PLATFORM>.se/us/app/vbuild/SLED11-i686/workbench/3.3.5.2/ocd-3.3/BoardFiles/PowerPC/e6500/Freescale/Freescale_T2080E_QDS.brd
-
-
-# ./wrenv.linux -p workbench-3.3
-# ./wrwb-x86-linux2.gtk
-# /app/vbuild/RHEL6-i686/workbench/3.3.5.2/workbench-3.3/wrwb/platform/x86-linux2/eclipse/wrwb-x86-linux2.gtk
-
-export WRSD_LICENSE_FILE="1794@camolx2847.mo.ca.am.<PLATFORM>.se,1794@camolx2848.mo.ca.am.<PLATFORM>.se,1794@camolx2849.mo.ca.am.<PLATFORM>.se"
-export LM_LICENSE_FILE="1794@camolx2847.mo.ca.am.<PLATFORM>.se,1794@camolx2848.mo.ca.am.<PLATFORM>.se,1794@camolx2849.mo.ca.am.<PLATFORM>.se"
-
-########                                     
-# Broadcom stuffs                     
-#####
-alias lab='cd /home/labguy/boot/<USER>m'
-alias ntsw4='cd /projects/ntsw-sw4/home/<USER>m'
-alias ntsw7='cd /projects/ntsw-sw7/home/<USER>m'
-alias ntsw3='cd /projects/ntsw-sw3/home/<USER>m'
-alias ntswh='cd /projects/ntswhome/<USER>m'
-alias sshb='ssh <USER>m@lc-sj1-2188.sj.broadcom.com'
-alias sshg='ssh <USER>m@gorn'
-
-alias cvsg='cervisia /home/<USER>m/source/sdk/'
+alias cvsg='cervisia /home/vadivelm/source/sdk/'
 alias tk='cd ${SDK} ; for file in `cat ${SDK}/../files.list` ; do  cvs up $file; tkdiff $file; done; cd -'
 alias cvsci='cd ${SDK} ; echo "Check for lmake errors****"; echo cvs -tnq ci -F ${SDK}/../files.log \`cat ${SDK}/../files.list\`; '
-cclci() { cd ${SDK}; echo; echo "Check for lmake errors****"; echo; ccollab login  http://coco.sj.broadcom.com <USER>m; echo ing-coco-review.sh --jira $(awk '{print $1}' ${SDK}/../files.log) $(cat ${SDK}/../files.list); }
+cclci() { cd ${SDK}; echo; echo "Check for lmake errors****"; echo; ccollab login  http://coco.sj.broadcom.com vadivelm; echo ing-coco-review.sh --jira $(awk '{print $1}' ${SDK}/../files.log) $(cat ${SDK}/../files.list); }
 
-alias partial='echo /projects/ntsw_sw_build/ntswbuild/dev-6.1.0/cfg/partials/'
-# vmk cvsup;
-# mk
-# lmk <file>
-# tk
-# cvsci
 # vmatrix.sh
 
 alias bterm='bsub -q sj-Intsw -R "(rhel&&r64bit)" -o /dev/null gnome-terminal'
@@ -157,19 +213,11 @@ alias mkup='vmk cvsup; make -j; make'
 alias mklx='bsub -q sj-ntsw -R "(rhel&&r64bit)" "cd $SDK/system/linux/user/gto-2_6;gmake SDK=$SDK -j4 QUIET=1;gmake SDK=$SDK QUIET=1"'
 
 #source code 
-alias cs='source /home/<USER>m/restricted/Scripts/bin/vcodedb'
-#alias sdbi='source /home/<USER>m/restricted/Scripts/bin/codedb install'
-#alias prebuild='/projects/ntsw-sw/bin/prebuild_check.pl'
-alias prebuild='/projects/ntsw-sw4/home/<USER>m/bin/prebuild_check.pl'
+alias cs='source /home/vadivelm/restricted/Scripts/bin/vcodedb'
+alias prebuild='/projects/ntsw-sw4/home/vadivelm/bin/prebuild_check.pl'
 alias sdk_bin='cd /projects/ntsw_sw_releases/sdk-binaries/'
 
 alias internal='cd /projects/ntsw-sw/swcvs/athena/internal'
-
-#Arch and misc code directories
-alias archc2='cd /projects/ntsw-sw4/home/bhanup/arch/triumph3/TR3_AV_5.1/arch/fb4'
-alias archc3='cd /projects/ntsw-arch3/AV/users/lokner/tot/arch/AV/fb4_humvp_fb4/wlan'
-alias archc1='cd /projects/ntsw-sw/perforce-daily/arch/'
-alias archc='cd /projects/ntsw-sw/dsg/bcmsim/src'
 
 #Verilog and system verilog(DV) code.
 alias vcode='cd /projects/ntsw-sw_scratch/p4db/daily/'
@@ -190,38 +238,6 @@ alias ntswqa='cd /projects/ntsw_sw_sqa/results/dvapi'
 #export SOC_TARGET_PORT=1199119
 export SOC_TARGET_COUNT=1
                          
-#SAL_BOOT_PLISIM(0x2000) and SAL_BOOT_BCMSIM(0x400000) flag 
-#NO RC (0x1000)
-#export SOC_BOOT_FLAGS=0x20000                        
-#export SOC_BOOT_FLAGS=0x420000
-export SOC_BOOT_FLAGS=0x421000
-export SOC_TARGET_SERVER=localhost
-export CCACHE_DISABLE=1
-                     
-#BCMSIM Environment variables
-export BCMSIM_ROOT=/projects/ntsw-sw/dsg/bcmsim/framework_v2.0
-export DEBUG_LEVEL=8 
-export BCMSIM_USER=<USER>m
-  
-BCMSIM_BIN="${BCMSIM_ROOT}/bin/bcmsim"
-alias setsim='export SOC_TARGET_PORT=$(vmk setsim)'
-#TR3 Simulation
-export BCMSIM_DEVICE=bcm56540
-TR3_CDF="${BCMSIM_ROOT}/run/<USER>m/configuration/${BCMSIM_DEVICE}.cdf"
-alias simtr3="${BCMSIM_BIN} -c ${TR3_CDF}"
-#Katana Simulation                   
-export BCMSIM_DEVICE=bcm56440                                       
-KAT_CDF="${BCMSIM_ROOT}/run/<USER>m/configuration/${BCMSIM_DEVICE}.cdf"
-alias simkat="${BCMSIM_BIN} -c ${KAT_CDF}"                          
-#Triumph2 Simulation                                                
-export BCMSIM_DEVICE=bcm56634                                       
-TR2_CDF="${BCMSIM_ROOT}/run/<USER>m/configuration/${BCMSIM_DEVICE}.cdf"    
-alias simtr2="${BCMSIM_BIN} -c ${TR2_CDF}"                          
-#Trident Simulation                                                 
-export BCMSIM_DEVICE=bcm56840                                     
-TD_CDF="${BCMSIM_ROOT}/run/<USER>m/configuration/${BCMSIM_DEVICE}.cdf"     
-alias simtd="${BCMSIM_BIN} -c ${TD_CDF}"                 
-                                                           
 # parse code
 alias afunc="awk '/^[A-Z|a-z]*_.*\(/,/)/'"
 alias asoc="awk '/^soc_.*\(/,/)/'"
@@ -242,7 +258,7 @@ alias aphy="awk '/^phy_.*\(/,/)/'"
 
 alias cleanup="find . -name ".nfs*" | xargs rm -f; find . -name "*testrun" | xargs rm -rf"
 
-export MYDOCS=/projects/ntsw-sw4/home/<USER>m/docs/brcm
+export MYDOCS=/projects/ntsw-sw4/home/vadivelm/docs/brcm
 alias  mkdoc='make -f ~/restricted/Scripts/make/rules.doc'
 alias  mtools='cd /projects/ntsw-sw8/home/hamilton/ntswtools/tools'
 # mkdoc clean; mkdoc allclean; mkdoc doc; mkdoc slides
@@ -258,23 +274,6 @@ alias  mtools='cd /projects/ntsw-sw8/home/hamilton/ntswtools/tools'
 # size of elf
 # size <elf file>
 
-###########################################
-# PLATFORM SPECIFIC
-##########################################
-
-# Add modules on the hub
-#export MODULEPATH=$MODULEPATH
-
-# Module Path
-#/app/modules/0/modulefiles
-#/env/ussj/modules
-#/env/common/modules
-#/tools/modules
-
-#export MODULEPATH="/tools/modules/Modules/versions:/tools/modules/Modules/3.2.9/modulefiles:/tools/modules:${MODULEPATH}"
-
-#[ -f ~/.modulelist ] && source ~/.modulelist
-
 
 ###########################################
 # git
@@ -285,42 +284,9 @@ alias  mtools='cd /projects/ntsw-sw8/home/hamilton/ntswtools/tools'
 #git config --global difftool.prompt false
 #git config --global alias.d difftool
 
-
-
-
 #for ((i=0; i < 100; i = ${i}+1)) ; do find swbuild${i} -maxdepth 1 | grep evadkan; done
 #/project/swbuild51/evadkan
 
-#alias sc="cd /scratch/51/evadkan"
-alias sc="cd /workspace/scratch/evadkan"
-#alias sw="cd /project/swbuild51/evadkan"
-alias sw="cd /workspace/git/evadkan/"
-alias spw="cd /project/spider2_fe/evadkan/"
-alias sysbuild="cd /home/sysbuild/images/hwdiags_dev"
-alias firmware="cd /archive/build-images/firmware_git/tarantula"
-
-
-##
-# Spider Asic servers
-# Hub:
-#     eussjlx3906.sj.us.am.<PLATFORM>.se 
-# Make servers: 
-#     ssh eussjlx3906.sj.us.am.<PLATFORM>.se
-#     export MODULEPATH=$MODULEPATH:/tools/modules
-#     module add lsf
-#     export DISPLAY=eussjlx9035:1437.0
-#     bsub -q normal /usr/bin/xterm
-#     bjobs
-#
-###
-
-
-#
-# Hub gmake build machines
-# gmake01-pduip.sj.us.am.<PLATFORM>.se
-# gmake02-pduip.sj.us.am.<PLATFORM>.se
-# gmake03-pduip.sj.us.am.<PLATFORM>.se
-#
 
 lxssh_sebootp()
 {
@@ -361,15 +327,6 @@ copy2sebootp()
     fi
 }
 alias cp2se="copy2sebootp"
-#anil /project/swbuild14/eanirao/
-#dan  /home/edagilson
-#shashi /home/eshaalu/bin
-#logs /project/diags/wolf/<ev>
-#hub_diags /project/hub_diags
-#paul fpga code /project/fpga/epauisr/fpga_cvs
-#cvs -d /project/network/CVSROOT co -p pcb/src/FPGA/spanky/src/includes/addr.vh
-#Xin - bios /home/ecenxin
-#ericg
 
 ### SPIDER2
 # bcm_sdk.git : /home/ejamcho/sandbox/trees
@@ -379,93 +336,13 @@ alias cp2se="copy2sebootp"
 #/project/cid/ciflash/eusjlxxen1501/workspace/hwdiags_wash_flow
 #/archive/build-images/hwdiags
 
-
-
-## git operation related
-gpull()
-{
-    SRC_TOP=$(pwd | awk -Fhwdiags '{print $1}')hwdiags
-    if [ -z ${SRC_TOP} ] ; then echo "set SRC_TOP directory"; exit; fi
-    if ! [ -d ${SRC_TOP}/../mods ]; then mkdir -p ${SRC_TOP}/../mods; fi
-    
-    cd ${SRC_TOP}
-    datestr=$(date +%m%d%y-%H%M)
-    echo "git pull > ${SRC_TOP}/../mods/mods.${datestr}"
-    git pull > ${SRC_TOP}/../mods/mods.${datestr}
-    if [ $? -ne 0 ] ; then echo "*** ERROR: git pull failed ";  fi
-    cat ${SRC_TOP}/../mods/mods.${datestr}
-    cd -    
-}
-
-gdiffcommit()
-{
-    SRC_TOP=$(pwd | awk -Fssr '{print $1}')ssr
-    if [ -z ${SRC_TOP} ] ; then echo "set SRC_TOP directory"; exit; fi
-    if ! [ -d ${SRC_TOP}/../diffs ]; then mkdir -p ${SRC_TOP}/../diffs; fi
-
-    cd ${SRC_TOP}
-    datestr=$(date +%m%d%y-%H%M)
-    echo "git diff --name-status origin integration | tee /home/evadkan/gitlog/git.files.${datestr}"
-    git diff --name-status origin integration | tee /home/evadkan/gitlog/git.files.${datestr}
-}
-
-gdiff()
-{
-    SRC_TOP=$(pwd | awk -Fssr '{print $1}')ssr
-    if [ -z ${SRC_TOP} ] ; then echo "set SRC_TOP directory"; exit; fi
-    if ! [ -d ${SRC_TOP}/../diffs ]; then mkdir -p ${SRC_TOP}/../diffs; fi
-
-    cd ${SRC_TOP}
-    datestr=$(date +%m%d%y-%H%M)
-    echo "git diff --name-status origin/integration | tee /home/evadkan/gitlog/git.files.${datestr}"
-    git diff --name-status origin/integration | tee /dev/null
-    git diff --name-only origin/integration > /home/evadkan/gitlog/git.files.${datestr}
-}
-
-
-
-gdiffview()
-{
-    SRC_TOP=$(pwd | awk -Fssr '{print $1}')ssr
-    if [ -z ${SRC_TOP} ] ; then echo "set SRC_TOP directory"; exit; fi
-
-    cd ${SRC_TOP}
-    git diff --name-only origin/integration | tee /dev/null
-    diff_files=$(git diff --name-only origin/integration)
-    for file in ${diff_files}
-    do
-        echo Diffing... git difftool -y -t gvimdiff origin/integration $file;
-        git difftool -y -t gvimdiff origin/integration $file 2> /dev/null
-    done
-}
-
-gdiffbkp()
-{
-    SRC_TOP=$(pwd | awk -Fssr '{print $1}')ssr
-    if [ -z ${SRC_TOP} ] ; then echo "set SRC_TOP directory"; exit; fi
-    
-    cd ${SRC_TOP}
-    datestr=$(date +%m%d%y-%H%M)
-    if ! [ -d ${SRC_TOP}/../mods/Changes.${datestr} ]; then mkdir -p ${SRC_TOP}/../mods/Changes.${datestr}; fi
-
-    git diff --name-only origin/integration | tee /dev/null
-    diff_files=$(git diff --name-only origin/integration)
-    for file in ${diff_files}
-    do
-        echo "ls $file | cpio -pmd ${SRC_TOP}/../mods/Changes.${datestr}"
-        ls $file | cpio -pmd ${SRC_TOP}/../mods/Changes.${datestr}
-    done
-
-    git diff origin/integration > ${SRC_TOP}/../mods/Changes.${datestr}/gitdiff.patch
-}
-
 ###########################################
 # doxy
 ##########################################
 
 #module avail doxygen
-module add doxygen/1.8.8
-module add graphviz/2.34.0
+#module add doxygen/1.8.8
+#module add graphviz/2.34.0
 
 # /project/pcb/evadkan/doxy
 
@@ -492,7 +369,7 @@ module add graphviz/2.34.0
 # GIT TS
 ##########################################
 
-module initadd emake/7.1.3
+#module initadd emake/7.1.3
 alias sshgit='ssh -Y eussjlx9035.sj.us.am.<PLATFORM>.se'
 alias sshasic='ssh -Y eussjlx3905.sj.us.am.<PLATFORM>.se'
 #alias sshhub='ssh -Y eussjlxxen1500.rnd.<PLATFORM>.se'

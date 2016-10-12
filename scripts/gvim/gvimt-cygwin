@@ -1,0 +1,16 @@
+#!/bin/bash
+
+export GV=$(tty)
+
+CYG_WRAPPER=/usr/bin/cyg-wrapper.sh
+GVIM_EXE=/cygdrive/c/Program\ Files\ \(x86\) /Vim/Vim73/gvim.exe
+GVIM_OPTS=--binary- opt=-c,--cmd,-T,-t,--servername,--remote-send,--remote-      expr
+
+if [ -z ${GV} ]
+then
+	echo "Set as export GV= \" \" variable";
+	exit 2
+fi
+
+${CYG_WRAPPER} /cygdrive/c/Program\ Files\ \(x86\) /Vim/Vim73/gvim.exe --        servername " GVIM-${GV}" --remote-tab-silent $* &
+#/tools/bin/gvim --servername "GVIM-${GV}" --remote-silent $* 2> /dev/null

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+export GV=$(tty)
+
+if [ -z ${GV} ]
+then
+	echo "Set as export GV= \" \" variable";
+	exit 2
+fi
+
+/usr/bin/gvim --servername "GVIM-${GV}" --remote-silent $* 2> /dev/null
