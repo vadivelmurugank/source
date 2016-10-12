@@ -1,0 +1,90 @@
+#.gdbinit file
+###########################################
+# Custom Commands
+##########################################
+#
+# gdbserver 
+#
+# gdbserver <targetip>:<port> [elf file]
+# gdbserver <targetip>:<port> --attach  pid
+#
+
+#Custom commands
+
+# gdbserver localhost:1235 <bcm.sim>
+#define setsimtr3
+#target remote localhost:1235
+#set arch i386:x86-64
+#file /projects/ntsw-sw3/home/vadivelm/sdktr3/sdk/systems/sim/bcm.sim
+#end
+#document setsimtr3
+#start bcm simulator
+#end
+
+#define setpc
+#set $pc=arg0
+#end
+#document setpc
+#set program counter
+#end
+
+#define ll
+#info args
+#info locals
+#end
+
+###########################################
+#[*]  Gdb settings
+##########################################
+
+# Backtrace past main
+set backtrace past-main on
+set backtrace past-entry on
+#set print array on
+#set print asm-demangle on
+#set print pretty on
+
+
+###########################################
+# Remote Target Connections
+##########################################
+
+echo target remote <bcm boards> \n
+#target remote 10.18.60.179:1235
+#target remote 10.18.102.219:1235
+#target remote 127.0.0.1:1235
+# kgdb
+#target remote udp:10.18.60.177:6443
+
+###########################################
+# Symbols and Files
+##########################################
+
+#dir <source dir>
+#set substitute-path  <src dir> <substitute-src-dir>
+
+#set sysroot  <rootfs>
+
+#file /home/labguy/boot/vadivelm/linux/radian/gto-2_6/bcm.user.dbg
+#add-symbol-file <symbol file > <address loaded > 
+
+###########################################
+# Default Breakpoints
+##########################################
+
+#breakpoints
+#b 
+
+###########################################
+# Display Variables
+##########################################
+
+#display variables
+#display/i $rip
+#display/x $rdi
+#display/x $rsi
+#display/x $rcx
+#display/x $rax
+
+# gdb -tui
+# gdb) set tui

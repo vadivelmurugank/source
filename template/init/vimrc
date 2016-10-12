@@ -1,0 +1,494 @@
+"###########################################################################
+"#########################  Vadivel Vimming ################################
+"###########################################################################
+
+"###########################################################################
+"General options
+"###########################################################################
+
+" No VI compatible
+set nocompatible
+
+" allow backspacing over everything in insert mode
+set backspace=indent,eol,start
+highlight Normal guifg=black guibg=white
+set guifont=*
+set guifont=Courier\ New\ 12
+
+"trailing spaces
+match ErrorMsg '\s\+$'
+"Delete trailing spaces
+" %s/\s\+$//e
+
+" Wrap text at width 80 and linebreak
+set ruler
+set textwidth=80
+set wrapmargin=80
+set co=80
+set wrap
+set lbr
+
+"#window size
+set lines=50
+set columns=80
+
+" set tab sizes and expand tabs
+set softtabstop=4
+set tabstop=4
+set shiftwidth=4
+set et
+
+"# syntax and fold options
+syntax on
+set nu
+
+"# ignore case during search
+set ic
+"set noic
+
+function FoldBrace() 
+  if getline(v:lnum+1)[0] == '{' 
+    return 1 
+  endif 
+  if getline(v:lnum) =~ '{' 
+    return 1 
+  endif 
+  if getline(v:lnum)[0] =~ '}' 
+    return '<1' 
+  endif 
+  return -1 
+endfunction
+" set foldexpr=FoldBrace() 
+" set foldmethod=expr
+
+" fold method indent open-zR close-zM zo zf
+"set foldmethod=indent
+" fold help: zR-open all zM-close all zo-open zc-close
+" zn - disable foldenable zi -invert foldenable
+
+"Misc options
+set history=50
+set hlsearch
+
+
+" Save and switch to other buffer.
+"map N :w <CTRL-M>
+map QQ :bd!<CR>
+map QD :q!<CR>
+map WW :w!<CR>
+map WQ :wq!<CR>
+
+" Jump between split windows
+" wmh=0 displays just file name
+set wmh=0
+map <C-J> <C-W>j<C-W>_
+map <C-K> <C-W>k<C-W>_ 
+
+" Commenting and uncommenting
+map C 0i/*<esc>A*/<esc>j 
+map X 0i<esc>A \n\t\<esc>j      
+map T 0xx$xxj
+
+"If you examine the first line, you will see that it does the following.
+"    * Moves to the beginning of the line
+"    * Enters Insert Mode
+"    * Places "\*" there
+"    * Escapes to command mode
+"    * Adds "*/" to the end of the line
+"    * Escapes to command mode
+"    * Moves down One line 
+" The second line does the following.
+"    * Moves to the beginning of the line
+"    * Removes 2 characters
+"    * Moves to the end of the line
+"    * Removes 2 characters
+"    * Moves down One line 
+
+"# default ctags settings
+"set tags+=/scratch/51/evadkan/cscope/sfi/tags
+"set tags+=/projects/ntsw-sw3/home/vadivelm/sdktr3/sdk/tags
+"cs add /scratch/51/evadkan/cscope/sfi/cscope.out
+"set csprg=/usr/bin/cscope
+set csprg=/app/cscope/15.8a/LMWP3/bin/cscope
+
+"#cscope settings
+if has("cscope")
+    set csprg=/app/cscope/15.8a/LMWP3/bin/cscope
+    "#set csprg=cscope
+    set csto=0
+    set cst
+    set nocsverb
+    " add any database in current directory
+    if filereadable("cscope.out")
+        ":cs add cscope.out
+    " else add database pointed to by environment
+    elseif $CSCOPE_DB != ""
+            cs add $CSCOPE_DB
+    endif
+    set csverb
+endif
+
+"###lid search###
+
+set grepprg=/usr/local/bin/lid\ -Rgrep\ -s
+set grepformat=%f:%l:%m
+map <C-L> :exe "grep" expand("<cword>")<CR>
+
+
+map _u :call ID_search()<Bar>execute "/\\<" . g:word . "\\>"<CR>
+map _n :n<Bar>execute "/\\<" . g:word . "\\>"<CR>
+
+function ID_search()
+  let g:word = expand("<cword>")
+  let x = system("lid --key=none ". g:word)
+  let x = substitute(x, "\n", " ", "g")
+  execute "next " . x
+endfun
+
+"##### Tab switching ###
+" MAX TABS
+set tabpagemax=25
+" Always show tabs
+set showtabline=2
+" Set tablabel format (see statusline)
+set guitablabel=\[%N\]\%t%M
+
+map ,t <Esc>:tabnew<CR>
+map ,m <Esc>:tabs<CR>
+map ,o :tabe <cfile><CR>
+nmap <leader><leader> gt
+"browse tabs: <n> CTRL PAGEUP ; CRTL PAGDOWN
+
+"minbufexpl
+"let g:miniBufExplMapWindowNavVim = 1 
+"let g:miniBufExplMapWindowNavArrows = 1 
+"let g:miniBufExplMapCTabSwitchBufs = 1 
+"let g:miniBufExplModSelTarget = 1 
+
+"###buffer switching###
+nmap > :bn<CR>
+nmap < :bp<CR>
+nmap <F5> :ls<cr>:b!<space>
+
+" map command mode editing
+nmap ; :
+
+"###########################################################################
+"### Key Mappings
+"###########################################################################
+map <F2> :set number<CR><CR>
+
+"###########################################################################
+"cscope key mappings
+"###########################################################################
+
+" Thg followitg maps all invoke one of the following cscope search types:
+    "
+    "   's'   symbol: find all references to the token under cursor
+    "   'g'   global: find global definition(s) of the token under cursor
+    "   'c'   calls:  find all calls to the function name under cursor
+    "   't'   text:   find all instances of the text under cursor
+    "   'e'   egrep:  egrep search for the word under cursor
+    "   'f'   file:   open the filename under cursor
+    "   'i'   includes: find files that include the filename under cursor
+    "   'd'   called: find functions that function under cursor calls
+    
+    nmap <C-\>a :cs add
+    nmap <C-\>h :cs find s <C-R>=expand("<cword>")<CR><CR> 
+    nmap <C-\>g :cs find g <C-R>=expand("<cword>")<CR><CR>  
+    nmap <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>  
+    nmap <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>  
+    nmap <C-\>e :scs find e <C-R>=expand("<cword>")<CR><CR>  
+    nmap <C-\>f :cs find f <C-R>=expand("<cfile>")<CR><CR>  
+    nmap <C-\>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+    nmap <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>  
+
+
+    " Using 'CTRL-spacebar' (intepreted as CTRL-@ by vim) then a search type
+    " makes the vim window split horizontally, with search result displayed in
+    " the new window.
+    "
+    " (Note: earlier versions of vim may not have the :scs command, but it
+    " can be simulated roughly via:
+    "    nmap <C-@>s <C-W><C-S> :cs find s <C-R>=expand("<cword>")<CR><CR>  
+
+    nmap <C-@>h :scs find s <C-R>=expand("<cword>")<CR><CR> 
+    nmap <C-@>g :scs find g <C-R>=expand("<cword>")<CR><CR> 
+    nmap <C-@>c :scs find c <C-R>=expand("<cword>")<CR><CR> 
+    nmap <C-@>t :scs find t <C-R>=expand("<cword>")<CR><CR> 
+    nmap <C-@>e :scs find e <C-R>=expand("<cword>")>CR><CR>
+    nmap <C-@>f :scs find f <C-R>=expand("<cfile>")<CR><CR> 
+    nmap <C-@>i :scs find i ^<C-R>=expand("<cfile>")<CR>$<CR>   
+    nmap <C-@>d :scs find d <C-R>=expand("<cword>")<CR><CR> 
+
+
+   "# Key map timeouts ( in milliseconds )
+    set timeoutlen=4000
+    set ttimeout
+    set ttimeoutlen=100
+
+   "# day time format
+   " < leader> key maps to backslash '\'
+   nmap <leader>tt i<CR><CR>===========================================<CR>..  <esc>"=strftime("%b %d, %Y (%T) ")<CR>Pi<CR>===========================================<CR><CR><esc>
+   nmap <leader>mm :r ~/docs/code-template/python-text.txt<CR><esc>
+    nmap <leader>rr i<CR>--------------------<CR><esc>
+    nmap <leader>ff i<CR>~~~~~~~~~~~~~~~~~~~~<CR><esc>
+
+"imap <leader>tt <Esc>"=strftime("%b %d, %Y (%T) ")<CR>Pi
+
+"############
+" <PLATFORM> Specific
+"############
+
+
+" Commenting and uncommenting
+map C 0i/*<esc>A*/<esc>j 
+map T 0xx$xxj
+
+" Function Headers and footers
+map C 0i/*<esc>A*/<esc>j 
+map F 0i/*<esc>A<CR> *<CR> */<esc>j 
+map T 0xx$xxj
+
+
+function WrFileHeading()
+let s:line=line(".")
+call setline(s:line,"/----------------------------------------------------------------------------") 
+call append(s:line,"* file.c ")
+call append(s:line+6,"* ")
+call append(s:line+7,"*")
+call append(s:line+8,"* <Desc>")
+call append(s:line+10,"*")
+call append(s:line+11,"* Copyright (c) 2016 <PLATFORM> AB")
+call append(s:line+12,"* All rights reserved")
+call setline(s:line,"/----------------------------------------------------------------------------") 
+call append(s:line,"* file.c ")
+call append(s:line+13,"*/")
+unlet s:line
+endfunction
+
+function WrFuncHeading()
+let s:line=line(".")
+call setline(s:line,"/****************************************************************************") 
+call setline(s:line,"/*")
+call append(s:line," * <func> ")
+call append(s:line+1," *          ")
+call append(s:line+2," *<Desc> ")
+call append(s:line+3," *")
+call append(s:line+4," *")
+call append(s:line+5," * Parameters: ")
+call append(s:line+6," *      dev       - (IN) device")
+call append(s:line+7," *")
+call append(s:line+8," * Returns:")
+call append(s:line+9," *      SUCCESS - Success")
+call append(s:line+10," *     FAILURE - Failure")
+call append(s:line+11," *     ")
+call append(s:line+12," */")
+unlet s:line
+endfunction
+
+ 
+
+
+function WrMakeFileHeading()
+let s:line=line(".")
+call setline(s:line,"#*****************************************************************************") 
+call append(s:line,"# Makefile - ")
+call append(s:line+1,"#")
+call append(s:line+6,"# DESCRIPTION")
+call append(s:line+7,"# -----------")
+call append(s:line+8,"#")
+call append(s:line+9,"# Copyright (c) 2016 <PLATFORM> AB")
+call append(s:line+10,"# All rights reserved")
+unlet s:line
+endfunction
+
+function WrMakeCppBlockHeading()
+let s:line=line(".")
+call setline(s:line,"//////////////////////////////////////////////////////////////////////////////////")
+call append(s:line,"// ")
+call append(s:line+1,"// ")
+call append(s:line+6,"// ")
+call append(s:line+7,"// ")
+call append(s:line+8,"//")
+unlet s:line
+endfunction
+
+map WH  <esc>mz:execute WrFileHeading()<CR>`zjA
+map WF  <esc>mz:execute WrFuncHeading()<CR>`zjA
+map WM  <esc>mz:execute WrMakeFileHeading()<CR>`zjA
+map WB  <esc>mz:execute WrMakeCppBlockHeading()<CR>`zjA
+
+
+"################
+"### VIM TIPS
+"################
+
+"#############################################
+"  VI SHORTCUT DESCRIPTIONS
+"############################################
+" http://vim.wikia.com/wiki/Main_Page
+"
+" cmap : handles command-line mappings.
+" imap : handles insert-only mappings.
+" map  : maps keys in normal, visual, and operator-pending mode.
+" map! : maps keys in Vim's command and insert modes.
+" nmap : maps keys in normal mode only.
+" omap : maps keys in operator-pending mode only.
+" vmap : maps keys in visual mode only.
+"############################################
+
+" 
+" C-^ : Move between files in windows
+" '"  : Predefined marks - prev position in file when left
+" '.   : Postion made last change
+
+" gg   : goto start of file
+" G    : end of file
+" <C-O> : control-cap(o) goback to fileexplorer window
+
+
+"#search and delete
+"# :%s/pattern1/pattern2/g
+"# :%s/pattern1/pattern2/gc - confirm and replace
+"# :%g/pattern1/d  - delete lines with pattern
+"# :%g!/pattern1/d - deleter line which don't have the patterns
+"# :line1,line2/d  - delete range of lines
+
+"# %s/^* \([a-z|A-Z]\)\+ /\t* \1/gc
+"     - \([a-z|A-Z]\)\+ : Search for pattern word
+"     - \t\1 : Matched pattern is stored in register 1 (\1)
+
+"# WINDOWS resize
+" Alt-F10 - maximize window
+" Alt-F5  - restore window
+" C-w C-_  - maximize height within window size
+" C-w C-|  - maximize width within window size
+" C-w =    - Make all windows equally hight and wide
+" C-w +/-N    - Resize windows size
+
+" C-w </>    - resize by 1
+" C-ws       - split windows horizontally
+" C-ww       - switch between windows
+" C-wq       - quit a windows
+" C-wv       - quite windows vertically
+
+"# WINDOWS WITH TABS
+" gvim -p [file1] [file2]
+" gvim --remote-tab-silent [file3] [file4]
+" gvim --serverlist - lists all GVIM sserver ( opened gvim windows)
+" gvim --remote-tab-silent -servername <GVIM|GVIM1-output with serverlist>
+" gt - move to next tab
+" gT - move to previous tab
+" (i)gt move to table in the i-th position
+" :tabfirst :tablast :tabclose :tabnew
+" : tabe <file-name >
+" :tabf <file -name > - finds file name in the directory
+" :tabs - lists all tabs
+
+"WINDOWS to TABS
+" :tab sp<CR> or (C-w) T
+" :tab -ball - convert all buffers to tabs
+
+" FORMATTING
+" gq formats the paragraph to textwidth and wrap settings
+" :[range]ce - align center
+" :[range]ri - right alignment
+" :[range]le - left alignment
+
+" VIMDIFF
+"do  Get changes from other window into the current window.
+"dp  Put the changes from current window into the other window.
+"]c  Jump to the next change.
+"[c  Jump to the previous change.
+"Ctrl W + Ctrl W  Switch to the other split window.
+"To ignore whitespace use this command: set diffopt+=iwhite
+"To turn that back off use: set diffopt-=iwhite
+"diffupdate - update changes
+
+"             
+" +-+-+-+---+--+----+
+" | Drawit rocks!!  |
+" +-+-+-+---+--+----+
+"                   
+" \di - drawit initialize [Drawit]                   
+" \ds - drwait stop       [Drawit stop]                  
+" arrow keys : draw the path
+" page up/down : diagnal
+" <space> toggle [drawit erase] and [drawit]
+"
+" Ctrl-V : visual block
+" visual block then:
+" \a - arrows
+" \b - blocks
+" \e - ecllipse
+" \c - prompt users for lines to insert space
+" \l - draw line joining the corners
+" <shift> cursor : disable drawit for the cursor movement
+" <ctrl> <leftmose> <arrow keys> - duplicate blocks
+" ay : copy it to register a ( brush a)
+" \ra : paste it
+" gR  : replace without changing layout
+" grc : replace text witout changing layout
+
+"call SetDrawIt('vertical','horizontal','crossing','downright','downleft','X','*') 
+"call SetDrawIt('|','-','+','\','/','X','*') 
+"call SetDrawIt('#','#','*','\','/','X','*') 
+"call SetDrawIt('!','~','.','\','/','X','*') 
+"call SetDrawIt('...','..','o','\','/','X','*') 
+
+"####################
+" Browsing files
+
+
+"########################
+" bro e - open explorer
+" bro w - open in this window
+" bro w <dir> - open director in windows
+
+"######################
+" [[ - goto prev function
+" ]] - goto next function
+" [m - goto start of the block
+" ]m - goto next block
+
+"############
+"  What More?
+"###########
+" File explorer - open with vertical split
+" CTRL-V - In visual mode, mark columns to copy column block and paste(YY)
+" %s/<new>/<old>/gc - Interactive search and replace
+" :g/<pattern>/command
+" :m/<pattern>match  
+" ["x]yy / ["x]yw yank in registger x
+" ["x]p - paste from register x
+
+" gf - open file name under cursor
+
+"### Convert Text File to HTML
+":runtime! syntax/2html.vim        : convert txt to html
+":TOhtml
+
+"################
+" git
+"################
+":Git [args]
+":Gcd [directory] - |:cd| relative to the repository.
+":Gstatus         - git-status 
+":Gcommit [args]  - git-commit
+":Ggrep [args]    - rep| with git-grep as 'grepprg'.
+":Glog [args]     - revision logs
+":Gedit [revision]       |:edit| a |fugitive-revision|.
+
+":Gsplit [revision]      |:split| a |fugitive-revision|.
+":Gvsplit [revision]     |:vsplit| a |fugitive-revision|.
+":Gtabedit [revision]    |:tabedit| a |fugitive-revision|
+":Gpedit [revision]      |:pedit| a |fugitive-revision|
+":Gread [revision]       Empty the buffer and |:read| a |fugitive-revision|.
+":Gwrite                 Write to the current file's path and stage the results.
+
+":Gdiff [revision]       Perform a |vimdiff| against the current file in the
+":Gsdiff [revision]      Like |:Gdiff|, but split horizontally.
+":Gvdiff [revision]      Identical to |:Gdiff|.  For symmetry with |:Gsdiff|.
+
+":Gblame [flags]         Run git-blame on the file and open 
