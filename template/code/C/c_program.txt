@@ -1,0 +1,199 @@
+
+.. sectnum::
+.. contents:: Table Of Contents
+.. header:: Header
+
+===========================================
+    C Program Tips and Tricks
+===========================================
+
+#. What is the problem statement?
+    * Model the problem.
+        - Equation
+
+#. Initialize Static Array
+.. code:: c
+    int array[1024] = {[0 ... 1023] = 5};
+    Char myspace[10] = {[0 ... 9] = \0'};
+    int widths[] = { [0 ... 9] = 1, [10 ... 99] = 2, [100] = 3 };
+
+
+#. Undefined Static Array in a struct
+It enables to expand the array or add magic symbol to struct;
+
+.. code: c
+    typedef struct buff_space_s {
+        int a;
+        float b;
+        bool flag;
+        int pri;
+        char expand[];
+    }buff_space_t;
+
+expand[] is the special notation in C struct declaration which is a symbol
+placeholder;
+
+
+#. How this Project solves the problem?
+     * Use cases
+
+
+#. What is the value add? differentiator?
+
+
+===========================================
+    INTERFACE
+===========================================
+
+.. |ThisImage| image:: myimage.jpg
+    :align: middle
+    :alt: MyIMage name
+    :target: images/myimage.jpg
+
+  
+#. Command Line
+#. Web/GUI
+#. API
+
+Here is my image: |ThisImage|
+
+
+===========================================
+    DATA STRUCTURE
+===========================================
+  
+#. Data Abstraction
+#. Data Association
+#. Data Struture
+
+Table:
+
+===== ===== ======
+   Inputs   Output
+----------- ------
+  A     B
+===== ===== ======
+False False True
+True  True  False
+===== ===== ======
+
+===========================================
+    ALGORITHMS
+===========================================
+  
+#. Arrange/Sort/Search
+#. Memory Allocate/layout
+#. Queues/Slice/Schedule
+
+
+subtitle
+--------
+
+
+
+
+.. code:: text
+
+    This is a text file
+
+.. code:: c
+
+    This is a c function
+
+.. code:: python
+
+    This is a python code
+
+.. code:: bash
+    
+    This is a bash script
+
+
+
+
+===========================================
+    SECTION TITLE
+===========================================
+
+.. code:: python
+
+    import sys
+    import os
+    import collections
+
+    class tsc_block:
+        # Constructor
+        def __init__(self):
+            self.global = 0
+            self._protected_variable = 0
+            self.__private_variable = 0
+            self.dict_var = collections.OrderedDict() # { }
+            self.list_var = list() # [  ]
+            self.tuple_var = tuple() # ( )
+            self.set_muttable_var = set() #  set([1,2,3])
+            self.frozenset_immutable_var = frozenset() # frozenset([1,2,3])
+            
+        # Destructor
+        def __del__(self): pass
+
+        # Callable object
+        def __call__(self, *args, **kwargs):
+
+        # Iterator Object
+        def __iter__(self):
+
+        def __next__(self):
+
+        # Descriptor
+        def __get__(self, obj, objtype=None):
+
+        def __set__(self, obj, value):
+
+        def __delete__(self, obj):
+
+        
+
+        #Generator Object
+        def generator_func():
+            yield a += 1
+
+        # Generator Expressions
+        sum([x*x for x in range(10)])
+        lfunc = lambda s, a: s+a[3]
+
+        # Decorator
+        def my_decorator_func(myfunc):
+            def wrapper(*args, **kwargs):
+                result = myfunc(*args, **kwargs)
+                # Do something generic
+                return result
+            return wrapper
+
+        @my_decorator_func
+        def runfunc(self, a, b)
+            return a + b
+
+        def class_func(self):
+            try:
+
+            except:
+        
+            throw:
+
+
+    ## functions
+    enumerate(["a", "b", "c"])
+    zip([1,2], [2,3])
+    map(func, [lists])
+    filter(func, [range])
+    reduce(openrator, [values])
+    
+    
+
+    if __name__ = "__main__":
+        import sys
+
+        cl = class_block(<init values>)
+        cl.class_func()
+
+
