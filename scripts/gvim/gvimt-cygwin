@@ -2,6 +2,9 @@
 
 export GV=$(tty)
 
+# Cyg-wrapper
+# https://github.com/ambv/.dot_files/blob/master/bin/cyg-wrapper.sh
+
 CYG_WRAPPER=/usr/bin/cyg-wrapper.sh
 GVIM_EXE=/cygdrive/c/Program\ Files\ \(x86\) /Vim/Vim73/gvim.exe
 GVIM_OPTS=--binary- opt=-c,--cmd,-T,-t,--servername,--remote-send,--remote-      expr
