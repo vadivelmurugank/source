@@ -1,5 +1,7 @@
 """
-    python template file
+mypython.py
+
+My python template file
 
 """
 
@@ -7,7 +9,10 @@ import sys
 import os
 import collections
 
-class tsc_block:
+class block:
+"""
+    Block Class
+"""
     # Constructor
     def __init__(self):
         self.global = 0
@@ -66,14 +71,13 @@ class tsc_block:
 
         throw:
 
-
-## functions
-enumerate(["a", "b", "c"])
-zip([1,2], [2,3])
-map(func, [lists])
-filter(func, [range])
-reduce(openrator, [values])
-
+def important_types():
+    ## functions
+    enumerate(["a", "b", "c"])
+    zip([1,2], [2,3])
+    map(func, [lists])
+    filter(func, [range])
+    reduce(openrator, [values])
 
 
 if __name__ = "__main__":
