@@ -1,0 +1,62 @@
+##################################################
+# make.python
+#
+#
+
+.phony: clean run runtest doc bytecode trace
+
+PYFILES=$(wildcard *.py)
+PYCFILES=$(PYFILES:.py=.pyc)
+MODNAME=$(patsubst %.py,%,$(MODULE))
+
+help:
+	@echo "make for $(MODULE)"
+	@echo "     run     : run the module"
+	@echo "     runtest : run module pytests"
+	@echo "     doc     : Generate pydoc and inspectshow"
+	@echo "     bytecode: Dump Bytecode of module"
+	@echo "     trace   : Generate function traces"
+
+all: run doc bytecode trace runtest
+
+clean:
+	rm -f *.pyc
+	rm -rf doc
+	rm -rf bytecode
+	rm -rf trace
+	rm -rf __pycache__
+
+run:
+	$(PYTHON) $(MODULE) $(ARGS)
+
+runtest:
+	@echo "Running pytests.."
+	test -d tests && py.test tests
+
+doc:
+	test ! -d doc && mkdir doc
+	$(PYTHON) -m pydoc $(MODNAME) > doc/$(MODNAME).doc
+	$(PYTHON3) -m inspectshow $(MODNAME) > doc/$(MODNAME).inspect
+
+bytecode: $(PYFILES)
+	test ! -d bytecode && mkdir bytecode
+	$(PYTHON) -m dis $? > bytecode/$?.bytecode
+
+
+trace:
+	test ! -d trace && mkdir trace
+	@echo -e "\n\n======>CALLING RELATIONSHIPS \n\n" > trace/$(MODULE).trace
+	$(PYTHON) -m trace -T $(MODULE) $(ARGS) >> trace/$(MODULE).trace
+	@echo -e "\n\n======>LIST FUNCTIONS \n\n" >> trace/$(MODULE).trace
+	$(PYTHON) -m trace -l $(MODULE) $(ARGS) >> trace/$(MODULE).trace
+	@echo -e "\n\n======>TRACE LINES \n\n" >> trace/$(MODULE).trace
+	$(PYTHON) -m trace -t $(MODULE) $(ARGS) >> trace/$(MODULE).trace
+	@echo -e "\n\n======>STATEMENT EXECUTIONS \n\n" >> trace/$(MODULE).trace
+	$(PYTHON) -m trace -c $(MODULE) $(ARGS) >> trace/$(MODULE).trace
+	
+
+##################################################
+# Generic rules
+
+%.pyc: %.py
+	$(PYTHON) -m compileall $<

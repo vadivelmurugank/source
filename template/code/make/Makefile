@@ -11,6 +11,13 @@ include make.rules
 
 C_FILES=$(wildcard *.c)
 
+$(error "message")
+$(warning "message")
+$(info "message")
+
+$(error VAR is $(C_FILES))
+$(warning  VAR is $(C_FILES))
+$(info VAR is $(C_FILES))
 
 .PHONY: help clean build
 

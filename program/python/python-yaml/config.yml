@@ -1,0 +1,659 @@
+#===========================================
+#  unix apis
+#
+#   api: 
+#        "Api Names" with instrinsic underscores "__"
+#   param: 
+#        Parameters and types
+#    
+#    return:
+#        returns
+#
+#    postattr:
+#        post compiler attribute
+#
+#    preattr:
+#        pre compiler attributes
+#
+#    include:
+#        include file
+#
+#    lib:
+#        library which has this defined symbol
+#
+#    file:
+#        implementation file
+#
+#    content:
+#       Usage and document
+#
+#===========================================
+
+unixapis:
+
+#=======================================================
+    process:
+#=======================================================
+
+###################
+        clone:
+###################
+            api:
+
+#=========================================================
+    memory:
+#=========================================================
+
+###################
+        mmap:
+###################
+            api: >
+                - void *mmap (void *__addr, size_t __len, int __prot, 
+                                    int __flags, int __fd, __off_t __offset)
+                - void *mmap64 (void *__addr, size_t __len, int __prot, 
+                                    int __flags, int __fd, __off64_t __offset)
+            param:
+                - void *__addr
+                - size_t __len
+                - int __prot
+                - int __flags
+                - int __fd
+                - __off_t __offset
+
+            return:
+                - void *
+            postattr:
+            preattr:
+            include:
+                - mman.h
+            lib:
+                - libc.a
+            file:
+                - glibc/ports/sysdeps/unix/sysv/linux/aarch64/mmap.c
+                - glibc/misc/mmap64.c
+            syscall:
+                __NR_mmap2
+            kerncall:
+            content: |
+                creates  a new mapping with starting addr and length of mapping
+                in the virtual address space of the calling process.
+
+                addr == null : kernel chooses address to create mapping
+                addr != null : mapping created at nearby page boundary (getpagesize())
+                
+                prot: Pages marked as:
+                    PROT_EXEC, PROT_READ, PROT_WRITE, PORT_NONE
+
+                flags: 
+                    MAP_SHARED : Shared to all other processes
+                    MAP_PRIVATE: Private Copy-On-Write Mapping
+                    MAP_32BIT: Map into 2GB process address space ( x86)
+                    MAP_ANONYMOUS : No File, fd and offset ignored
+                    MAP_HUGETLB: mapping using huge pages
+                    MAP_LOCKED: Lock the pages of the mapped memory region
+                    MAP_NORESERVE: Do not reserve swap space for this mapping
+
+###################
+        mremap:
+###################
+            api:
+                - void *mremap (void *__addr, size_t __old_len,
+                                    size_t __new_len, int __flags, ...) __THROW;
+            param:
+                - void *__addr
+                - size_t __old_len
+                - size_t __new_len
+                - int __flags
+
+            return:
+                - void *
+            postattr:
+            preattr:
+            include:
+                - mman.h
+            lib:
+                - libc.a
+            file:
+                - glibc/ports/sysdeps/unix/sysv/linux/aarch64/mmap.c
+                - glibc/misc/mmap64.c
+            syscall:
+                __NR_mremap
+            kerncall:
+            content: |
+
+                Remap pages mapped by the range [ADDR,ADDR+OLD_LEN) to new
+                length NEW_LEN.  If MREMAP_MAYMOVE is set in FLAGS the returned address may
+                differ from ADDR.  If MREMAP_FIXED is set in FLAGS the function takes another
+                paramter which is a fixed address at which the block resides after a successful
+                call.
+
+###################
+        munmap:
+###################
+            api:
+                - int munmap (void *__addr, size_t __len) __THROW;
+
+            param:
+                - void *__addr
+                - size_t __len
+
+            return:
+                - int
+            postattr:
+            preattr:
+            include:
+                - mman.h
+            lib:
+                - libc.a
+            file:
+                - glibc/ports/sysdeps/unix/sysv/linux/aarch64/mmap.c
+                - glibc/misc/mmap64.c
+            syscall:
+                __NR_munmap
+            kerncall:
+            content: |
+                Deallocate any mapping for the region starting at ADDR and 
+                extending LEN bytes. Returns 0 if successful, 
+                -1 for errors (and sets errno).
+
+###################
+        mprotect:
+###################
+            api:
+                - int mprotect (void *__addr, size_t __len, int __prot) __THROW;
+
+            param:
+                - void *__addr
+                - size_t __len
+                - int __prot
+
+            return:
+                - int
+            postattr:
+            preattr:
+            include:
+                - mman.h
+            lib:
+                - libc.a
+            file:
+                - glibc/ports/sysdeps/unix/sysv/linux/aarch64/mmap.c
+                - glibc/misc/mmap64.c
+            syscall:
+                __NR_mprotect
+            kerncall:
+            content: |
+                Change the memory protection of the region starting at ADDR and
+                extending LEN bytes to PROT. 
+
+                prot: Pages marked as:
+                    PROT_EXEC, PROT_READ, PROT_WRITE, PORT_NONE
+
+###################
+        msync:
+###################
+            api:
+                - int msync (void *__addr, size_t __len, int __flags)
+
+            param:
+                - void *__addr
+                - size_t __len
+                - int __flags
+
+            return:
+                - int
+            postattr:
+            preattr:
+            include:
+                - bits/mman.h
+            lib:
+                - libc.a
+            file:
+                - glibc/sysdeps/mach/msync.c
+            syscall:
+                __NR_msync
+            kerncall:
+            content: |
+                Synchronize the region starting at ADDR and extending LEN bytes with the
+                file it maps.  Filesystem operations on a file being mapped are
+                unpredictable before this is done.
+
+                MS_ASYNC	1		/* Sync memory asynchronously.  */
+                MS_SYNC		0		/* Synchronous memory sync.  */
+                MS_INVALIDATE	2		/* Invalidate the caches.  */
+
+###################
+        madvise:
+###################
+            api:
+                - int madvise (void *__addr, size_t __len, int __advise)
+
+            param:
+                - void *__addr
+                - size_t __len
+                - int __advise
+
+            return:
+                - int
+            postattr:
+            preattr:
+            include:
+                - bits/mman.h
+            lib:
+                - libc.a
+            file:
+                - glibc/sysdeps/mach/madvise.c
+            syscall:
+                __NR_msync
+            kerncall:
+            content: |
+                Advise the system about particular usage patterns the program follows
+                for the region starting at ADDR and extending LEN bytes.
+
+                MADV_NORMAL	 0	/* No further special treatment.  */
+                MADV_RANDOM	 1	/* Expect random page references.  */
+                MADV_SEQUENTIAL 2	/* Expect sequential page references.  */
+                MADV_DONTNEED	 4	/* Don't need these pages.  */
+
+###################
+        mlock:
+###################
+            api:
+                - int mlock (const void *__addr, size_t __len) __THROW;
+
+            param:
+                - void *__addr
+                - size_t __len
+
+            return:
+                - int
+            postattr:
+            preattr:
+            include:
+                - bits/mman.h
+            lib:
+                - libc.a
+            file:
+                - glibc/sysdeps/mach/hurd/mlock.c
+            syscall:
+                __NR_mlock
+            kerncall:
+            content: |
+                Guarantee all whole pages mapped by the range [ADDR,ADDR+LEN) to
+                be memory resident.
+
+###################
+        munlock:
+###################
+            api:
+                - int munlock (const void *__addr, size_t __len) __THROW;
+
+            param:
+                - void *__addr
+                - size_t __len
+
+            return:
+                - int
+            postattr:
+            preattr:
+            include:
+                - bits/mman.h
+            lib:
+                - libc.a
+            file:
+                - glibc/sysdeps/mach/hurd/mlock.c
+            syscall:
+                __NR_mlock
+            kerncall:
+            content: |
+                Unlock whole pages previously mapped by the range [ADDR,ADDR+LEN).
+
+###################
+        mlockall:
+###################
+            api:
+                - int mlockall (int __flags) __THROW;
+
+            param:
+                - int __flags
+
+            return:
+                - int
+            postattr:
+            preattr:
+            include:
+                - bits/mman.h
+            lib:
+                - libc.a
+            file:
+                - glibc/sysdeps/mach/hurd/mlock.c
+            syscall:
+                __NR_mlock
+            kerncall:
+            content: |
+                Cause all currently mapped pages of the process to be memory resident
+                until unlocked by a call to the `munlockall', until the process exits,
+                or until the process calls `execve'.
+
+###################
+        munlockall:
+###################
+            api:
+                - int munlockall (void) __THROW;
+
+            param:
+                - int __flags
+
+            return:
+                - int
+            postattr:
+            preattr:
+            include:
+                - bits/mman.h
+            lib:
+                - libc.a
+            file:
+                - glibc/sysdeps/mach/hurd/mlock.c
+            syscall:
+                __NR_munlock
+            kerncall:
+            content: |
+                All currently mapped pages of the process' address space become
+                unlocked. 
+
+###################
+        mincore:
+###################
+            api:
+                - int mincore (void *__start, size_t __len, unsigned char *__vec) __THROW;
+
+            param:
+                - void *__start
+                - size_t __len
+                - unsigned char *__vec
+
+            return:
+                - int
+            postattr:
+            preattr:
+            include:
+                - bits/mman.h
+            lib:
+                - libc.a
+            file:
+                - glibc/sysdeps/mach/hurd/mlock.c
+            syscall:
+                __NR_munlock
+            kerncall:
+            content: |
+                mincore returns the memory residency status of the pages in the
+                current process's address space specified by [start, start + len).
+                The status is returned in a vector of bytes.  The least significant
+                bit of each byte is 1 if the referenced page is in memory, otherwise
+                it is zero.
+
+###################
+        remap_file_pages:
+###################
+            api:
+                - int remap_file_pages (void *__start, size_t __size, int __prot, size_t __pgoff, int __flags) __THROW;
+
+            param:
+                - void *__start
+                - size_t __size
+                - int __prot
+                - size_t __pgoff
+                - int __flags
+            return:
+                - int
+            postattr:
+            preattr:
+            include:
+                - bits/mman.h
+            lib:
+                - libc.a
+            file:
+                - glibc/sysdeps/mach/hurd/mlock.c
+            syscall:
+                __NR_remap_file_pages
+            kerncall:
+            content: |
+                Remap arbitrary pages of a shared backing store within an existing
+                VMA. 
+
+###################
+        malloc:
+###################
+            api:
+                - void *malloc (size_t __size) __THROW;
+            param:
+                - size_t __size
+            return:
+                - void *
+            postattr:
+                - throw()
+            preattr:
+            include:
+                - stdlib.h
+            lib:
+                - libc.a
+            file:
+                - glibc-2.17/malloc/malloc.c 
+            syscall:
+                mmap
+            kerncall:
+            content: |
+                Allocate SIZE bytes of memory and memory not initialized.  For
+                large (>= 512 bytes) requests, it is a pure best-fit allocator,
+                with ties normally decided via FIFO (i.e. least recently used
+                (LRU)).
+                For small (<= 64 bytes by default) requests, it is a caching
+                allocator, that maintains pools of quickly recycled chunks.
+                
+###################
+        calloc:
+###################
+            api:
+                - void *calloc (size_t __nmemb, size_t __size) __THROW
+            param:
+                - size_t __nmemb
+                - size_t __size
+            return:
+                - void *
+            postattr:
+                - throw()
+            preattr:
+            include:
+                - stdlib.h
+            lib:
+                - libc.a
+            file:
+                - glibc-2.17/malloc/malloc.c 
+            syscall:
+                mmap
+            kerncall:
+            content: |
+                Allocate NMEMB elements of SIZE bytes each, all initialized to 0
+                Allocates memory for an array of nmemb elements of size bytes
+                each allocator, that maintains pools of quickly recycled chunks.
+
+###################
+        realloc:
+###################
+            api:
+                - void *realloc (void *__ptr, size_t __size) __THROW
+                - void *realloc (void *__ptr, size_t __size) throw()
+            param:
+                - void* __ptr
+                - size_t __size
+            return:
+                - void *
+            postattr:
+                - throw()
+            preattr:
+            include:
+                - stdlib.h
+            lib:
+                - libc.a
+            file:
+                - glibc-2.17/malloc/malloc.c 
+            syscall:
+                mmap
+            kerncall:
+            content: |
+                Re-allocate the previously allocated block in PTR, making the new block SIZE bytes long.
+                The algorithm prefers extending __ptr when possible, otherwise
+                it employs the equivalent of a malloc-copy-free sequence.
+
+                if __ptr == NULL then equivalent to malloc(__size)
+                if __size == 0   then equivalen to free(__ptr)
+
+###################
+        free:
+###################
+            api:
+                - void free (void *__ptr) __THROW
+            param:
+                - void* __ptr
+            return:
+                - void
+            postattr:
+                - throw()
+            preattr:
+            include:
+                - stdlib.h
+            lib:
+                - libc.a
+            file:
+                - glibc-2.17/malloc/malloc.c 
+            syscall:
+                munmap
+            kerncall:
+            content: |
+                Free a block allocated by `malloc', `realloc' or `calloc'.
+
+###################
+        memalign:
+###################
+            api:
+                - void *memalign (size_t __alignment, size_t __size) __THROW
+            param:
+                - size_t __alignment
+                - size_t __size
+            return:
+                - void *
+            postattr:
+                - throw()
+            preattr:
+            include:
+                - stdlib.h
+            lib:
+                - libc.a
+            file:
+                - glibc-2.17/malloc/malloc.c 
+            syscall:
+                mmap
+            kerncall:
+            content: |
+                Allocate SIZE bytes allocated to ALIGNMENT bytes.
+                The address of the allocated memory will be a multiple of
+                alignment, which must be a power of two and a multiple of
+                sizeof(void *).
+
+###################
+        valloc:
+###################
+            api:
+                - void *valloc (size_t __size) __THROW 
+            param:
+                - size_t __size
+            return:
+                - void *
+            postattr:
+                - throw()
+            preattr:
+            include:
+                - stdlib.h
+            lib:
+                - libc.a
+            file:
+                - glibc-2.17/malloc/malloc.c 
+            syscall:
+                mmap
+            kerncall:
+            content: |
+                Allocate SIZE bytes on a page boundary.
+                memory address will be a multiple of the page size. It is equivalent to         
+                    memalign(sysconf(_SC_PAGESIZE), size).
+                    memalign(getpagesize(), size).
+
+###################
+        mallinfo:
+###################
+            api:
+                - struct mallinfo mallinfo (void) __THROW;
+            param:
+                - void
+            return:
+                - void
+            postattr:
+                - throw()
+            preattr:
+            include:
+                - stdlib.h
+            lib:
+                - libc.a
+            file:
+                - glibc-2.17/malloc/malloc.c 
+            syscall:
+            kerncall:
+            content: |
+                Returns a copy of the updated current malloc info
+                    struct mallinfo
+                    {
+                      int arena;    /* non-mmapped space allocated from system */
+                      int ordblks;  /* number of free chunks */
+                      int smblks;   /* number of fastbin blocks */
+                      int hblks;    /* number of mmapped regions */
+                      int hblkhd;   /* space in mmapped regions */
+                      int usmblks;  /* maximum total allocated space */
+                      int fsmblks;  /* space available in freed fastbin blocks */
+                      int uordblks; /* total allocated space */
+                      int fordblks; /* total free space */
+                      int keepcost; /* top-most, releasable (via malloc_trim) space */
+                    };
+
+###################
+        mallopt:
+###################
+            api:
+                - int mallopt (int __param, int __val) __THROW;
+            param:
+                - int __param
+                - int __val
+            return:
+                - int
+            postattr:
+                - throw()
+            preattr:
+            include:
+                - stdlib.h
+            lib:
+                - libc.a
+            file:
+                - glibc-2.17/malloc/malloc.c 
+            syscall:
+            kerncall:
+            content: |
+               The mallopt() function adjusts parameters that control the behavior
+               of the memory-allocation functions 
+
+                M_TRIM_THRESHOLD    -1
+                M_TOP_PAD           -2
+                M_MMAP_THRESHOLD    -3
+                M_MMAP_MAX          -4
+                M_CHECK_ACTION      -5
+                M_PERTURB	        -6
+                M_ARENA_TEST	    -7
+                M_ARENA_MAX	        -8
+
+
