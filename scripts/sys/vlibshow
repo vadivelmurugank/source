@@ -1,0 +1,80 @@
+LD_LIBPATHS=$(ldconfig -Nv 2> /dev/null | grep -v ^$'\t' | sed 's/\:.*/ /')
+
+# /etc/ld.so.conf.d/*.conf
+# ld -v
+# ldconfig -Nv
+# LDLIBRARY_PATH
+        
+DLIBS=""
+
+function show_lib()
+{
+    #echo "2: ${2}"
+    baselib=$(basename ${1})
+    libstr=""
+    libstr=$(echo ${DLIBS} | grep ${baselib})
+    if [ ${#libstr} -eq 0 ]
+    then 
+        alllibs=$(objdump -p ${1} | grep NEEDED | awk -F" " '{print $2}')
+        #echo -e "${1} alllibs - ${alllibs} \n"
+        DLIBS="${DLIBS} ${baselib}"
+        for libfile in ${alllibs}
+        do
+            lspace+="\t"
+            echo -e "${2}\t|"
+            echo -e "${2}\t+--- $libfile"
+
+            if [ -f ${LIBPATH}/${libfile} ]
+            then
+                show_lib ${LIBPATH}/${libfile} "${2}\\t"
+            else 
+               for libpath in ${LD_LIBPATHS}
+                do
+                    if [ -f ${libpath}/${libfile} ]
+                    then
+                        #echo "show_lib ${libpath}/${libfile} "${2}----""
+                        show_lib ${libpath}/${libfile} "${2}\\t"
+                        break
+                    fi
+                 done
+            fi
+        done
+    fi
+}
+
+OUTFILE=$1
+OUTLIBS=$(objdump -p ${OUTFILE} | grep NEEDED | awk -F" " '{print $2}')
+LIBPATH=$(dirname $OUTFILE)
+
+echo -e "ldconfig Libshow for ${1}.. \n"
+echo -e "Searching in ${LIBPATH} ${LD_LIBPATHS} \n\n"
+
+echo -e "===================================="      
+echo -e "${1}"
+echo -e "===================================="      
+
+myspace="\t"
+
+for lib in ${OUTLIBS}
+do
+    if [ -f ${LIBPATH}/${lib} ]
+    then
+        show_lib ${LIBPATH}/${lib}
+    else 
+       for libpath in ${LD_LIBPATHS}
+        do
+            if [ -f ${libpath}/${lib} ]
+            then
+                echo -e "${myspace}|"
+                echo -e "${myspace}@---- ${libpath}/${lib}"
+                show_lib ${libpath}/${lib} ${myspace}
+                break
+            fi
+         done
+    fi
+done
+
+echo -e "\n\n"
+echo -e "***************************************"
+echo -e "ldd -v \n\n"
+ldd -v ${OUTFILE}
