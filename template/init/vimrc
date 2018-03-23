@@ -236,6 +236,20 @@ map <F2> :set number<CR><CR>
 
 "imap <leader>tt <Esc>"=strftime("%b %d, %Y (%T) ")<CR>Pi
 
+
+"#####################
+" Documentation
+"#####################
+    nmap <leader>h1 i<CR>-------------------------------------------------------<CR><esc>
+    nmap <leader>h2 i<CR>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<CR><esc>
+    nmap <leader>h3 i<CR>++++++++++++++++++++++++++++++++++++++++++++++++++++++++<CR><esc>
+    nmap <leader>h4 i<CR>^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^<CR><esc>
+    nmap <leader>t1 i<CR>.. contents::<CR><CR><esc>
+    nmap <leader>b1 i<CR>.. code::<CR><CR><esc>
+    nmap <leader>b2 i<CR>.. \|link\| image:: image.jpg<CR>    :align: middle<CR><CR><esc>
+    nmap <leader>b3 i<CR>.. list-table:: tablename<CR>    :widths: 10 5 10<CR><CR><esc>
+
+
 "############
 " <PLATFORM> Specific
 "############
