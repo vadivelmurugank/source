@@ -129,6 +129,14 @@ show_process()
     #ps auxf  | awk '{ printf("%6u MB\t", $6/1024); printf("%-6s \t\t", $1); for(i=11;i<=NF;++i) printf("%s ", $i);printf("\n")}'
 
     # pstree $(pgrep <<process name>. )
+    # -A : Ascii
+    # -h : highlight running process
+    # -t : thread names
+    # -s : parents
+    # -l : don't truncate long lines
+    pstree -A
+    pstree -A -h  -st -l
+
 
     # list all threads
     # ps -Tef | grep vfrwd
