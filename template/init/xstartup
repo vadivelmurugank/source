@@ -1,7 +1,8 @@
 #!/bin/sh
-#
+# VNC Startup script
+# apt-get install vnc4server tightvncviewer
 # apt-get install lxpanel gnome-desktop gnome-panel
-#
+# ${HOME}/.vnc/xstartup
 
 export XKL_XMODMAP_DISABLE=1
 unset SESSION_MANAGER
