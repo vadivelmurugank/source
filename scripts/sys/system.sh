@@ -20,6 +20,24 @@
 #        - ram
 #
 
+#####
+## Perf
+########
+#pstree -Aa -st -l
+#perf record -F 99 -ag -p $(pidof switchd)
+
+#perf report -n
+#perf report -n --stdio
+
+#Flamegraph
+# git clone https://github.com/brendangregg/FlameGraph  # or download it from github
+
+#cd FlameGraph
+#perf record -F 99 -ag -- sleep 60
+#perf script | ./stackcollapse-perf.pl > out.perf-folded
+#cat out.perf-folded | ./flamegraph.pl > perf-kernel.svg
+
+
 show_host()
 {
     echo -e "\n\n Host Info"
@@ -134,8 +152,8 @@ show_process()
     # -t : thread names
     # -s : parents
     # -l : don't truncate long lines
-    pstree -A
-    pstree -A -h  -st -l
+    pstree -Aa
+    pstree -Aa -h  -st -l
 
 
     # list all threads
@@ -345,24 +363,23 @@ show_network()
     printf "=======================================================\n"
     printf "%-14s: %-7s | %-20s | %-20s | %-15s | %s\n" "|  intf" "    link" "    drv" "    hwaddr" "   inet" "   mask"
     printf "=======================================================\n"
-    for intf in $(ifconfig -s | sed '1d' | awk -F"  " '{print $1}')
+    for intf in $(netstat -ia -p | sed '1,2d' | awk -F"  " '{print $1}')
     do
     #hwaddr=$(ifconfig $intf | grep -Go 'ether [a-zA-Z0-9:]\+' | awk -F'ether ' '{print $2}')
-    hwaddr=$(ifconfig $intf | grep -Go 'HWaddr [a-zA-Z0-9:]\+' | awk -F'HWaddr ' '{print $2}')
+    hwaddr=$(ifconfig $intf | grep -Go 'ether [a-zA-Z0-9:]\+' | awk -F'ether ' '{print $2}')
     [ -z "$hwaddr" ] && hwaddr="----"
     link=$(ifconfig $intf | grep -Go 'Link encap:[a-zA-Z]\+' | awk -F'Link encap:' '{print $2}')
     [ -z "$link" ] && link="-"
+    inet=$(ifconfig $intf | grep -Go 'inet [a-zA-Z0-9.]\+' | awk -F'inet ' '{print $2}')
     #inet=$(ifconfig $intf | grep -Go 'inet [a-zA-Z0-9.]\+' | awk -F'inet ' '{print $2}')
-    inet=$(ifconfig $intf | grep -Go 'inet addr:[a-zA-Z0-9.]\+' | awk -F'inet addr:' '{print $2}')
     [ -z "$inet" ] && inet="-"
-    #mask=$(ifconfig $intf | grep -Go 'netmask [a-zA-Z0-9.]\+' | awk -F'netmask ' '{print $2}')
-    mask=$(ifconfig $intf | grep -Go 'Mask:[a-zA-Z0-9.]\+' | awk -F'Mask:' '{print $2}')
+    mask=$(ifconfig $intf | grep -Go 'netmask [a-zA-Z0-9.]\+' | awk -F'netmask ' '{print $2}')
+    #mask=$(ifconfig $intf | grep -Go 'Mask:[a-zA-Z0-9.]\+' | awk -F'Mask:' '{print $2}')
     [ -z "$mask" ] && mask="-"
     drv=$(ethtool -i $intf 2> /dev/null | grep driver | awk -F'driver: ' '{print $2}')
     [ -z "$drv" ] && drv="-"
     printf "%-14s: %7s %20s %20s %15s %s\n" "$intf" "$link" "$drv" "$hwaddr" "$inet" "$mask"
     done
-
 
     echo -e "\n\n Network Link "
     echo -e "-----------------------------------------------"
@@ -374,12 +391,12 @@ show_network()
     #ifconfig -a
     #for intf in $(ifconfig -s | sed '1d' | awk -F"  " '{print $1}') ; do echo $intf; ethtool -S $intf | grep -i "drops: [1-9]\+" ; done
 
-    echo -e "\n\n#$ statistics: ifconfig -s \n"
-    ifconfig -s
+    echo -e "\n\n#$ statistics: netstat -ia -p \n"
+    netstat -ia -p
 
 
     echo -e "\n\n#$ Ethernet NIC features: ethtool -? \n"
-    for intf in $( ifconfig -s | sed '1d' | awk -F"  " '{print $1}' ) ; do \
+    for intf in $( netstat -ia -p | sed '1,2d' | awk -F"  " '{print $1}' ) ; do \
     echo -e "\n\n\n==========================================\n" ; \
     echo "       $intf" ;  \
     echo -e "\n==========================================\n" ; \
@@ -401,8 +418,8 @@ show_network()
     echo -e "\n\n#$ tcpdump -D \n"
     tcpdump -D
 
-    echo -e "\n\n#$ netstat -i \n"
-    netstat -i
+    echo -e "\n\n#$ netstat -ia \n"
+    netstat -ia
 
 
     echo -e "\n\n#$ ip a \n"
@@ -433,16 +450,16 @@ show_network()
     lsof -i
 
     echo -e "\n\n#$ ss -t -a # all tcp sockets \n"
-    ss -t -a # all tcp sockets
+    ss -t -ap # all tcp sockets
 
     echo -e "\n\n #$  ss -u -a # all udp sockets \n"
-    ss -u -a # all udp sockets
+    ss -u -ap # all udp sockets
 
     echo -e "\n\n #$ ss -w -a # all raw sockets \n"
-    ss -w -a # all raw sockets
+    ss -w -ap # all raw sockets
 
     echo -e "\n\n #$ ss -x -a # all unix sockets \n"
-    ss -x -a # all unix sockets
+    ss -x -ap # all unix sockets
 }
 
 
