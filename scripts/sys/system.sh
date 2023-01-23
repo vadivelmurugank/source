@@ -23,19 +23,22 @@
 #####
 ## Perf
 ########
-#pstree -Aa -st -l
+pstree -Aa -st -l
 #perf record -F 99 -ag -p $(pidof switchd)
 
-#perf report -n
-#perf report -n --stdio
+perf report -n
+perf report -n --stdio
 
 #Flamegraph
 # git clone https://github.com/brendangregg/FlameGraph  # or download it from github
+ cd FlameGraph
+sudo sh -c "perf record -F 99 -ag -- sleep 60"
+perf script | ./stackcollapse-perf.pl > out.perf-folded
+cat out.perf-folded | ./flamegraph.pl > perf-kernel.svg
 
-#cd FlameGraph
-#perf record -F 99 -ag -- sleep 60
-#perf script | ./stackcollapse-perf.pl > out.perf-folded
-#cat out.perf-folded | ./flamegraph.pl > perf-kernel.svg
+# vlibshow
+export LD_LIBRARY_PATH=$SDE/install/lib
+~/bin/vlibshow ./libbf_switch.so > ~/bin/libbf_switch_symbols.txt
 
 
 show_host()
@@ -56,6 +59,9 @@ show_host()
     dmidecode -t system
     echo -e "\n\n #$ dmidecode -t bios \n"
     dmidecode -t bios
+    dmidecode -t slot
+    dmidecode -t baseboard
+    dmidecode -t chassis
 }
 
 
@@ -138,6 +144,17 @@ show_docker()
 
 show_process()
 {
+
+        ## Total number of priorities = 140
+        ## Real time priority range(PR or PRI):  0 to 99 
+        ## User space priority range: 100 to 139
+
+        ## Nice value range (NI): -20 to 19
+        ## PR = 20 + NI
+        ## PR = 20 + (-20 to + 19)
+        ## PR = 20 + -20  to 20 + 19
+        ## PR = 0 to 39 which is same as 100 to 139.  
+
     echo -e "\n\n Process Info"
     echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
@@ -147,24 +164,25 @@ show_process()
     #ps auxf  | awk '{ printf("%6u MB\t", $6/1024); printf("%-6s \t\t", $1); for(i=11;i<=NF;++i) printf("%s ", $i);printf("\n")}'
 
     # pstree $(pgrep <<process name>. )
-    # -A : Ascii
-    # -h : highlight running process
-    # -t : thread names
-    # -s : parents
-    # -l : don't truncate long lines
-    pstree -Aa
-    pstree -Aa -h  -st -l
+    # pstree $(pgrep <<process name>. )
+	# -A : Ascii
+	# -a : args
+	# -h : highlight running process
+	# -t : thread names
+	# -s : parents
+	# -l : don't truncate long lines
+	pstree -Aa -h  -st -l
 
 
-    # list all threads
-    # ps -Tef | grep vfrwd
+# list all threads
+# ps -Tef | grep vfrwd
 
-    pids=
-    for pid in $(ls -1 /proc | grep -E '^[0-9]+')
-    do
-        pids="$pids $pid"
-        Threads=$(awk -F'\t' '/^Threads/ {print $2}' /proc/$pid/status)
-        if [ XX$Threads != "XX" ] ; then
+pids=
+for pid in $(ls -1 /proc | grep -E '^[0-9]+')
+do
+pids="$pids $pid"
+Threads=$(awk -F'\t' '/^Threads/ {print $2}' /proc/$pid/status)
+if [ XX$Threads != "XX" ] ; then
             if [ -d /proc/$pid/task ] ; then
                 pids="$pids $(ls -1 /proc/$pid/task/ | grep -E '^[0-9]+')"
             fi
@@ -198,6 +216,10 @@ show_process()
         #echo -e "${ThreadGroup} -> ${Parent} ->  ${TName} :: ${Tid} : ${TCpus} - ${VmPeak}"
         printf "%-10s -> %-10s -> %10s (%5s) core:%s : vmsize=%s Threads:%s\n" "${ThreadGroup}" "${Parent}" "${TName}" "${Tid}"  "${TCpus}" "${VmPeak}" "${Threads}"
     done
+
+
+    #ps -p $pid  -L -o pid,tid,cputime,args,psr,pcpu
+    #ps -p $pid -L -o uname,pid,psr,pcpu,cputime,pmem,rsz,vsz,tty,s,etime,args
 
 
     echo -e "\n\nProcess Shared Memory and Semaphores"
@@ -241,11 +263,15 @@ show_kernel()
     #echo -e "-----------------------------------------------"
     #echo -e "\n\n#$ depmod -a\n"
     #depmod -a
+
+    # List module parameters
+    # systool -vm $mod
     
     echo -e "\n\n Installed Kernel Modules"
     echo -e "-----------------------------------------------"
-    echo -e "\n\n#$ for mod in `lsmod | awk '{print $1}'`; do echo -e \"$mod\", \"$(modinfo -F description $mod)\", \"$(modinfo -F filename $mod)\" , \"$(modinfo -F license $mod)\" , \"$(modinfo -F parm $mod)\" , \"$(modinfo -F depends $mod)\" , \"$(modinfo -F alias $mod)\" ; done \n"
-    for mod in $(lsmod | awk '{print $1}') ; do echo -e \"$mod\", \"$(modinfo -F description $mod)\", \"$(modinfo -F filename $mod)\" , \"$(modinfo -F license $mod)\" , \"$(modinfo -F parm $mod)\" , \"$(modinfo -F depends $mod)\", \"$(modinfo -F alias $mod)\" ; done 
+    echo -e "\n\n#$ for mod in `lsmod | awk '{print $1}'`; do echo -e \"$mod\", \"$(modinfo -F description $mod)\", \"$(modinfo -F filename $mod)\" , \"$(modinfo -F license $mod)\" , \"$(modinfo -F parm $mod)\" , \"$(modinfo -F depends $mod)\" , \"$(modinfo -F alias $mod)\" ; done \n" 
+for mod in $(lsmod | awk '{print $1}') ; do echo -e \"$mod\", \"$(modinfo -F description $mod)\", \"$(modinfo -F filename $mod)\" , \"$(modinfo -F license $mod)\" , \"$(modinfo -F parm $mod)\" , \"$(modinfo -F depends $mod)\",
+\"$(modinfo -F alias $mod)\" ; systool -vm $mod ; done 
 
 
     echo -e "\n\n Kernel module static nodes"
@@ -277,6 +303,8 @@ show_cpu()
 
     echo -e "\n\n#$ lshw \n"
     lshw
+
+    #taskset -c -p <pid>
 }
 
 show_memory()
@@ -286,6 +314,9 @@ show_memory()
 
     echo -e "\n\n#$ dmidecode -t memory \n"
     dmidecode -t memory
+    
+    echo -e "\n\n#$ dmidecode -t cache \n"
+    dmidecode -t cache
 
     echo -e "\n\n#$ cat /proc/meminfo \n"
     /proc/meminfo
@@ -462,7 +493,6 @@ show_network()
     ss -x -ap # all unix sockets
 }
 
-
 show_scheduler()
 {
 
@@ -545,6 +575,12 @@ show_statistics()
 
 show_perf_counters()
 {
+    # top 
+    top -n 1 -b
+
+    # top respective cpu
+    top -c 1 -n 1 -b
+
     echo -e "\n\n CPU Performance Counters"
     echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 

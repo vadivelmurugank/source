@@ -15,7 +15,8 @@ function show_lib()
     libstr=$(echo ${DLIBS} | grep ${baselib})
     if [ ${#libstr} -eq 0 ]
     then 
-        alllibs=$(objdump -p ${1} | grep NEEDED | awk -F" " '{print $2}')
+        alllibs=$(ldd ${1} | awk -F" " '{print $1}')
+        #alllibs=$(objdump -p ${1} | grep NEEDED | awk -F" " '{print $2}')
         #echo -e "${1} alllibs - ${alllibs} \n"
         DLIBS="${DLIBS} ${baselib}"
         for libfile in ${alllibs}
@@ -43,7 +44,8 @@ function show_lib()
 }
 
 OUTFILE=$1
-OUTLIBS=$(objdump -p ${OUTFILE} | grep NEEDED | awk -F" " '{print $2}')
+#OUTLIBS=$(objdump -p ${OUTFILE} | grep NEEDED | awk -F" " '{print $2}')
+OUTLIBS=$(ldd ${OUTFILE} | awk -F" " '{print $1}')
 LIBPATH=$(dirname $OUTFILE)
 
 echo -e "ldconfig Libshow for ${1}.. \n"
@@ -78,3 +80,8 @@ echo -e "\n\n"
 echo -e "***************************************"
 echo -e "ldd -v \n\n"
 ldd -v ${OUTFILE}
+
+echo -e "\n\n"
+echo -e "***************************************"
+echo -e "DYNAMIC SYM : nm -gCD \n\n"
+nm -gCD ${OUTFILE}
