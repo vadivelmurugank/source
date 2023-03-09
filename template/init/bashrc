@@ -1,16 +1,47 @@
 #######################################
 # MY BASHRC
+#
+# source custom user profile
+#
+#source $HOME/.bashrc.user
 #######################################
 
+# Encoding
+export LC_ALL=C.UTF-8 
+export LANG=C.UTF-8  
+
+# List process opened
+#sudo lsof -U +c 15 | cut -f1 -d' ' | sort | uniq -c | sort -rn | head
 
 ########
 #  FUNCTIONS
 ########
 
 # gvim wrapper
+
+#alias gvim='gvim --servername A --remote-tab-silent'
 function gvimt() {
 
-	/usr/bin/gvim --servername "GVIM-${tty}" --remote-tab-silent $* 2> /dev/null
+	gvim --servername "GVIM-$(tty)" --remote-tab-silent $* 2> /dev/null
+}
+
+function svim() {
+
+        hostname=$(echo $(hostname) | tr '-' '_')
+        if [ -n "$TMUX" ] ; then
+                sess=$($(which tmux) display-message -p '#{session_name}-#{window_index}')
+        else
+                sess=$(tty)
+        fi
+        export GV=$(hostname)-${sess}
+        if  [ -z "${GV}" ] ; then
+                echo "Set as export GV= \" \" variable";
+                exit 2
+        fi
+
+        #echo gvim --servername "$(hostname)-${GV}" --remote-tab-silent $* 2> /dev/null
+        vim -v --servername "AA-${GV}"  --remote-tab-silent $* 2> /dev/null
+
 }
 
 ## git operation related
@@ -91,16 +122,18 @@ function gdiffbkp()
     git diff origin/integration > ${SRC_TOP}/../mods/Changes.${datestr}/gitdiff.patch
 }
 
+# Git add files
+# for file in $(git diff --name-only); do git add  $file ; done
 
+#ignore swap files
+# cat ~/.gitignore
+#   *.sw*
+#   *.swp
+#   *.swo
+# git config --global core.excludesfile ~/.gitignore
 
-
-
-
-
-
-
-
-
+# List Private File
+# for pfile in $(git ls-files --others --exclude-standard) ; do echo $pfile ;  done
 
 
 ###########
@@ -108,14 +141,21 @@ function gdiffbkp()
 ############
 
 #setting PATH Variable
-export PATH=$PATH:/home/pico/anaconda3/bin/
+export PATH=${HOME}/bin:$PATH
+
+
+# export custom pythonpath
+# pip3 install --prefix=/ws/vakannap-sjc/packages/python
+# pip3 install --upgrade --force-reinstall --prefix=/ws/vakannap-sjc/packages/python hieroglyph
+#export PYTHONPATH=${HOME}/github/inspectshow:${HOME}/github/apiparse:${HOME}/github/peekextn:${PYTHONPATH}
+#alias python='python3'
 
 export SHELL=/bin/bash
 #export DISPLAY=xl-sj1-14.sj.<PLATFORM>.com:32.0
 alias disp='export DISPLAY=xl-sj1-19.sj.<PLATFORM>.com:41.0'
 
 # umask read/write for group
-umask 002
+umask 0022
 
 # acroread
 alias acroread='acroread -openInNewInstance'
@@ -141,13 +181,13 @@ export CVSEDITOR=vi
 #export LM_LICENSE_FILE=1769@esekilx1001.rnd.ki.sw.license.com
 #export VCS_LIC_EXPIRE_WARNING=1
 
-#vncserver -geometry 1920x1080
-#vncserver -geometry 1600x890
+#vncserver -localhost no -geometry 1920x1080
+#vncserver -localhost no -geometry 1600x890
 
 #set CSCOPE variable
 export CSCOPEVER=OS
-export CSCOP_DB=
-export CSCOPE_EDITOR=gvimt
+export CSCOPE_DB=
+#export CSCOPE_EDITOR=gvimt
 #export LD_LIBRARY_PATH=
 
 export GV="`uname -n`-`tty`"
@@ -163,16 +203,20 @@ alias tre='tree -l -L 1'
 alias email='sendmail vadivel@email.com'
 
 
-alias cscope='/usr/bin/cscope -p4 -dq'
+alias cscope='cscope -p4 -dq'
 #alias cscope='export CSCOPE_DB=/scartch/51/evadkan/cscope/cscope.out;cscope -p4 -dq'
 alias tid='/usr/local/bin/lid -Rgrep -s'
 #alias gvim='/projects/ntsw-sw4/home/vadivelm/Install/bin/gvim -u /projects/ntsw-sw4/home/vadivelm/Install/bin/.vimrc --servername GVIM-`tty` --remote-tab-silent'
 #alias vi='/projects/ntsw-sw4/home/vadivelm/Install/bin/gvim -u /projects/ntsw-sw4/home/vadivelm/Install/bin/.vimrc --servername GVIM-`tty` --remote-tab-silent'
 
-alias vi='gvimt'
-alias vimain='/usr/bin/gvim --servername GVIM-MAIN --remote-tab-silent'
-alias vimain1='/usr/bin/gvim --servername GVIM-MAIN1 --remote-tab-silent'
-           
+#alias vi='bash gvimt'
+alias vimain='gvim --servername GVIM-MAIN --remote-tab-silent'
+alias vimain1='gvim --servername GVIM-MAIN1 --remote-tab-silent'
+
+#tmux aliases
+alias tl="tmux list-sessions"
+alias ta="tmux attach-session -t"
+
 alias ddd='/usr/bin/ddd'
 alias dddppc='ddd --debugger /projects/ntsw-sw3/linux/wrslinux_2.0/gto/glibc_std/host-cross/powerpc-wrs-linux-gnu/x86-linux2/powerpc-wrs-linux-gnu-ppc_e500v2-glibc_std-gdb'
 alias gdbtui='gdb -tui'
@@ -191,12 +235,13 @@ alias gdbtui='gdb -tui'
 # 7: Find this file:
 # 8: Find files #including this file:
 
-CSCOPE_OUT=/project/pcb/evadkan/cscope/hwdiags/cscope.out
-alias csf='cscope -d  -f${CSCOPE_OUT} -c  -L -0 '
+CSCOPE_OUT=/nobackup/vakannap/source/rel_9_2_0_121_linkedtree/cscope.out
+alias css='cscope -d  -f${CSCOPE_OUT} -c  -L -0 '
 alias csd='cscope -d  -f${CSCOPE_OUT} -c  -L -1 '
-alias css='cscope -d  -f${CSCOPE_OUT} -c  -L -5 '
-alias cssr='cscope -d  -f${CSCOPE_OUT} -c  -L -6 '
+alias csg='cscope -d  -f${CSCOPE_OUT} -c  -L -6 '
 alias csc='cscope -d  -f${CSCOPE_OUT} -c  -L -3 '
+alias cscl='cscope -d  -f${CSCOPE_OUT} -c  -L -2 '
+alias csf='cscope -d  -f${CSCOPE_OUT} -c  -L -7 '
                                      
 alias cvsg='cervisia /home/vadivelm/source/sdk/'
 alias tk='cd ${SDK} ; for file in `cat ${SDK}/../files.list` ; do  cvs up $file; tkdiff $file; done; cd -'
@@ -280,9 +325,16 @@ alias  mtools='cd /projects/ntsw-sw8/home/hamilton/ntswtools/tools'
 ##########################################
 #module add git 
 # requires git --version : 1.8.1.x
-#git config --global diff.tool tkdiff
-#git config --global difftool.prompt false
-#git config --global alias.d difftool
+git config --global diff.tool tkdiff
+git config --global difftool.prompt false
+git config --global alias.d difftool
+
+
+# git history of all patches in the code
+# git log -p -M --follow --stat -- path/to/your/file  
+
+# git pretty
+# git log --decorate --oneline --graph
 
 #for ((i=0; i < 100; i = ${i}+1)) ; do find swbuild${i} -maxdepth 1 | grep evadkan; done
 #/project/swbuild51/evadkan
@@ -328,6 +380,9 @@ copy2sebootp()
 }
 alias cp2se="copy2sebootp"
 
+alias docs="cd /ws/vakannap-sjc/deepspace/docs"
+alias code="cd /ws/vakannap-sjc/deepspace/code"
+
 ### SPIDER2
 # bcm_sdk.git : /home/ejamcho/sandbox/trees
 # spider2 sdk : /tools/cad/misc/spider_sdk/sdk_rel_2.5.0
@@ -335,6 +390,13 @@ alias cp2se="copy2sebootp"
 #### hwdiags prewash
 #/project/cid/ciflash/eusjlxxen1501/workspace/hwdiags_wash_flow
 #/archive/build-images/hwdiags
+
+
+######
+# tmux
+######
+
+#alias tmux="tmux new -s $(hostname)"
 
 ###########################################
 # doxy
@@ -379,9 +441,61 @@ alias sshaws='ssh -i ~/scripts/picothing.pem ec2-user@52.8.124.219'
 # cd /workspace/git/evadkan
 # scratch space: /workspace/scratch/evadkan/
 
+alias pstree='pstree -Aa -h  -Sst -l -ps'
+
 #===========================================
 # module add j2re, jdk, jenkins
 #===========================================
 
 alias runjenkinsgit='java -Xms1336m -Xmx1336m -DJENKINS_HOME=/home/evadkan/jenkinsgit -jar /app/vbuild/NOARCH/jenkins/1.604/lib/jenkins/jenkins.war'
 alias runjenkinsasic='java -Xms1336m -Xmx1336m -DJENKINS_HOME=/home/evadkan/jenkinsasic -jar /app/vbuild/NOARCH/jenkins/1.604/lib/jenkins/jenkins.war'
+
+
+# sjc-ads-4282 saarunac  /nobackup/saarunac
+# sjc-ads-3648 : /nobackup/rajasiva
+#    /ws/rajasiva-sjc find . -maxdepth 5
+#    /nobackup/rajasiva
+#
+#  find . -name "tags" -type l -maxdepth 2 -exec ls -l {} \; | sort -n
+#  find /nobackup/rajasiva  -name "tags" -type l -maxdepth 5 -exec ls -l {} \; | sort -n
+#  find /ws/rajasiva-sjc/ -name "tags" -type l -maxdepth 5 -exec ls -l {} \; | sort -n
+#
+
+## ACL
+# tasaxena-lnx1.cisco.com
+# tasaxena
+# /nobackup/tasaxena/ptp_75_2_j/x3.diff
+
+
+# sjc-ads-275 : /nobackup/sugan
+# sjc-ads-4107 : /nobackup/sayadlap
+#sjc-ads-4908:/nobackup/kkomarag/tree/BUG_TREES/Fretta_J2/jdb_124
+
+
+
+#===========================================
+# Cross Compile
+#===========================================
+
+alias lgcc='${HOME}/bin/compile.sh'
+
+alias acmediff='acme diff -cmd tkdiff -opts w ' 
+#export ACME_DIFF_CMD=/usr/cisco/bin/tkdiff ; export ACME_DIFF_OPTS="";  export ACME_DIFF_TO_BACKGROUND=1
+
+# Web Page
+# https://wwwin-people.cisco.com/Help/create.html
+
+# people.cisco.com
+# /auto/wwwPeople/vakannap
+
+
+# eclipse
+#eclipse installer: /auto/dc3/vakannap/downloads/eclipse-installer
+#Redirect home: (eclipse-inst.ini)
+#    -Duser.home=/auto/wit/.eclipse
+#    -Doomph.setup.user.home.redirect=true
+#    -Doomph.setup.install.root=/auto/wit/.eclipse
+export PATH=${PATH}:/auto/wit/.eclipse/parallel-2020-12/eclipse
+# egit eclipse plugin
+
+
