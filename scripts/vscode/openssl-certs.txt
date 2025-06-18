@@ -1,0 +1,64 @@
+
+openssl-certs
+==================
+
+/bin/rm -rf $HOME/.certs
+mkdir -p $HOME/.certs
+cd $HOME/.certs
+
+cat << OPENSSL_CNF > $HOME/.certs/openssl.cnf
+[req]
+distinguished_name = req_distinguished_name
+attributes = req_attributes
+/code
+[req_distinguished_name]
+
+[req_attributes]
+
+[v3_ca]
+basicConstraints        = critical,CA:TRUE
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always,issuer:always
+#keyUsage                = critical,keyCertSign
+
+OPENSSL_CNF
+
+# Create common self-signed CA cert
+openssl req -x509                                          \
+  -newkey rsa:4096                                         \
+  -nodes                                                   \
+  -days 3650                                               \
+  -keyout $HOME/.certs/ca.key                              \
+  -out $HOME/.certs/ca.crt                                 \
+  -subj /C=US/ST=CA/L=SJ/O=CUSTOM/CN=custom/               \
+  -config /etc/ssl/openssl.cnf                             \
+  -extensions v3_ca                                        \
+  -sha384
+
+openssl req -new -nodes -utf8 -sha256 -days 36500 -batch -x509 \
+    -config $HOME/.certs/x509.genkey \
+    -outform PEM \
+    -out $HOME/.certs/signing_key.pem \
+    -keyout $HOME/.certs/signing_key.pem
+
+/bin/rm -rf $HOME/.certs
+mkdir -p $HOME/.certs
+cd $HOME/.certs
+openssl req -x509 -nodes -days 36500 -newkey rsa:2048 -keyout $HOME/.certs/x509.key -out $HOME/.certs/x509.crt
+
+
+/bin/rm -rf $HOME/.certs
+mkdir -p $HOME/.certs
+cd $HOME/.certs
+
+# Create CA 2048-bit RSA private key
+openssl genrsa -out $HOME/.certs/ca.key 2048
+
+# CA certificate signing Request (CSR)
+openssl req -new -key $HOME/.certs/ca.key -out $HOME/.certs/ca.csr -config /etc/ssl/openssl.cnf
+
+# Self Signing CA certificates (365x10 --10yrs)
+openssl x509 -req -in $HOME/.certs/ca.csr -signkey $HOME/.certs/ca.key -out $HOME/.certs/ca.crt -days 3650 
+
+
+

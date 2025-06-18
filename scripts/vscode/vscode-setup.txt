@@ -1,0 +1,35 @@
+
+----------------------------------
+vscode setup
+----------------------------------
+
+Extensions:
+
+Python:
+ ms-python.python
+
+restructedtext:
+	restructuredtext extension: restructuredtext 
+	reST syntax higlighting: trond-snekvik.simple-rst
+	Esbonio:swyddfa.esbonio
+
+File extension settings:
+	Add key "*.txt" "restructuredtext"
+
+
+
+https://slashdot.org/software/p/IntelliSense/alternatives
+
+https://mastermakrela.com/kernel/lkp/vs-code-setup
+
+├── linux # The kernel source code
+│   ├── .clang-format
+│   ├── .vscode
+│   │   ├── c_cpp_properties.json
+│   │   ├── settings.json
+│   ├── scripts
+│   │   └── checkpatch.pl
+└── my-kernel-module
+│   ├── .vscode
+│   │   ├── c_cpp_properties.json
+│   │   ├── settings.json

@@ -1,0 +1,250 @@
+        VSCODE ( code-server)
+===========================================
+
+vcode-server is an extension to Microsoft vscode which uses different extension
+VSX registry.
+
+Open VSX is an open-source registry for VS Code extensions, operated by the
+Eclipse Foundation under the responsibility of the Open VSX Working Group.)
+  * https://open-vsx.org/?sortBy=relevance&sortOrder=desc
+  * https://github.com/EclipseFdn/open-vsx.org
+
+'Microsoft extension marketplace <https://marketplace.visualstudio.com/>`
+
+Quick shortcuts:
+  - ctrl-` : Toggle terminal
+  - ctrl-shift-p : open command palatte
+  - ctrl-shift-f : Search for all occurences
+
+code-server:
+
+  * https://coder.com/docs/code-server/install 
+  * https://technat.ch/posts/remote-coding/
+
+install:
+
+  - curl -fsSL https://code-server.dev/install.sh | sh -s -- --dry-run
+  - curl -fsSL https://code-server.dev/install.sh | sh
+
+On System startup:
+
+  sudo systemctl enable --now code-server@$USER
+
+config.yaml:
+
+  .. code::
+
+    hostname -I
+
+    # Change bindaddr to hostip and auth to none
+    sed -i 's/^bind-addr.*/bind-addr: <IP>:65000/g' ~/.config/code-server/config.yaml
+    sed -i 's/^auth:.*/auth: none/g' ~/.config/code-server/config.yaml
+    sed -i.bak 's/cert: false/cert: true/' ~/.config/code-server/config.yaml
+    sudo systemctl restart --now code-server@$USER
+
+ca.cert:
+
+  .. code:: 
+
+    code-server --bind-addr <IP>:8111 -e <path>
+      https://<IP>:8111
+
+    code-server  --bind-addr <IP>:8111 --cert=$HOME/.certs/ca.crt --cert-key=$HOME/.certs/ca.key -e  /home/mevts/driver_repo
+
+    code-server  --bind-addr <IP>:8112 --cert=$HOME/.certs/ca.crt --cert-key=$HOME/.certs/ca.key -e  /home/mevts/xdpsock/
+
+      /bin/rm -rf $HOME/.certs
+      mkdir -p $HOME/.certs
+      cd $HOME/.certs
+
+      cat << OPENSSL_CNF > $HOME/.certs/openssl.cnf
+      [req]
+      distinguished_name = req_distinguished_name
+      attributes = req_attributes
+      /code
+      [req_distinguished_name]
+
+      [req_attributes]
+
+      [v3_ca]
+      basicConstraints        = critical,CA:TRUE
+      subjectKeyIdentifier    = hash
+      authorityKeyIdentifier  = keyid:always,issuer:always
+      #keyUsage                = critical,keyCertSign
+
+      OPENSSL_CNF
+
+      # Create common self-signed CA cert
+      openssl req -x509                                          \
+        -newkey rsa:4096                                         \
+        -nodes                                                   \
+        -days 3650                                               \
+        -keyout $HOME/.certs/ca.key                              \
+        -out $HOME/.certs/ca.crt                                 \
+        -subj /C=US/ST=CA/L=SJ/O=CUSTOM/CN=custom/               \
+        -config /etc/ssl/openssl.cnf                             \
+        -extensions v3_ca                                        \
+        -sha384
+
+  ==>/usr/lib/code-server/lib/node -h
+
+code-server settings.json:
+
+.. code::
+
+    # cat $HOME/.local/share/code-server/User/settings.json
+    {
+        "security.workspace.trust.untrustedFiles": "open",
+        "vim.vimrc.enable": true,
+        "vim.vimrc.path": "$HOME/.vimrc",
+        "workbench.sideBar.location": "right",
+        "editor.minimap.enabled": false,
+        "explorer.openEditors.visible": 1,
+        "editor.bracketPairColorization.enabled": false,
+        "editor.guides.indentation": false,
+        "editor.tabSize": 8,
+        "editor.insertSpaces": false,
+        "editor.lineNumbers": "off",
+        "workbench.colorTheme": "Visual Studio Dark - C++",
+        "workbench.preferredDarkColorTheme": "Visual Studio Dark - C++",
+        "workbench.preferredHighContrastColorTheme": "Visual Studio Dark - C++",
+        "workbench.preferredHighContrastLightColorTheme": "Visual Studio Dark - C++",
+        "workbench.preferredLightColorTheme": "Visual Studio Dark - C++",
+        "terminal.integrated.macOptionClickForcesSelection": true
+    }
+
+code-server Processes
+------------------------
+
+.. code::
+
+          pstree -a
+          
+          │   ├─bash
+            │   │   └─node /usr/lib/code-server --bind-addr <IP>:8111 /home/mevts/driver_repo
+            │   │       ├─node /usr/lib/code-server/out/node/entry
+            │   │       │   ├─node --dns-result-order=ipv4first /usr/lib/code-server/lib/vscode/out/bootstrap-fork --type=extensionHost --transformURIs --useHostProxy=false
+            │   │       │   │   ├─node /usr/lib/code-server/lib/vscode/extensions/json-language-features/server/dist/node/jsonServerMain --node-ipc --clientProcessId=3906529
+            │   │       │   │   │   └─6*[{node}]
+            │   │       │   │   └─12*[{node}]
+            │   │       │   ├─node /usr/lib/code-server/lib/vscode/out/bootstrap-fork --type=fileWatcher
+            │   │       │   │   └─12*[{node}]
+            │   │       │   ├─node /usr/lib/code-server/lib/vscode/out/bootstrap-fork --type=ptyHost --logsPath /root/.local/share/code-server/logs/20250610T131429
+            │   │       │   │   ├─bash --init-file /usr/lib/code-server/lib/vscode/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh
+            │   │       │   │   └─11*[{node}]
+            │   │       │   ├─node --dns-result-order=ipv4first /usr/lib/code-server/lib/vscode/out/bootstrap-fork --type=extensionHost --transformURIs --useHostProxy=false
+            │   │       │   │   └─12*[{node}]
+            │   │       │   ├─node /usr/lib/code-server/lib/vscode/out/bootstrap-fork --type=fileWatcher
+            │   │       │   │   └─12*[{node}]
+            │   │       │   └─10*[{node}]
+            │   │       └─10*[{node}]
+
+          Sockets:
+            netstat -anlp | grep code
+              unix  2      [ COMPUTE ]     STREAM     LISTENING     22170338 3906529/node         /run/user/0/vscode-ipc-1cf59249-11c5-47a9-9888-b51a0553bd25.sock
+              unix  2      [ COMPUTE ]     STREAM     LISTENING     22170354 3906529/node         /run/user/0/vscode-git-71d5928006.sock
+              unix  2      [ COMPUTE ]     STREAM     LISTENING     22121782 3767958/node         /run/user/0/vscode-ipc-b4e6901c-8f28-4e1b-aa88-56c664d28571.sock
+              unix  2      [ COMPUTE ]     STREAM     LISTENING     22035343 3908075/node         /run/user/0/vscode-ipc-ddd509ac-bbc4-469d-9224-4cb9ed0521bd.sock
+              unix  2      [ COMPUTE ]     STREAM     LISTENING     22035366 3908075/node         /run/user/0/vscode-git-2cf8e9683a.sock
+              unix  2      [ COMPUTE ]     STREAM     LISTENING     21981904 3767958/node         /root/.local/share/code-server/code-server-ipc.sock
+
+          Mem:
+          ps -eo size,pid,user,command --sort -size | \
+              awk '{ hr=$1/1024 ; printf("%13.2f Mb ",hr) } { for ( x=4 ; x<=NF ; x++ ) { printf("%s ",$x) } print "" }' |\
+              cut -d "" -f2 | cut -d "-" -f1
+                257.54 Mb /usr/lib/code
+                204.96 Mb /usr/lib/code
+                143.52 Mb /usr/lib/code
+                105.43 Mb /usr/lib/code
+                  99.52 Mb /usr/lib/code
+                  99.30 Mb /usr/lib/code
+                  89.49 Mb /usr/lib/code
+                  52.86 Mb /usr/lib/code
+
+
+ # curl -fsSL https://code-server.dev/install.sh | sh -s -- --dry-run
+  Red Hat Enterprise Linux 9.2 (Plow)
+  Installing v4.100.3 of the amd64 rpm package from GitHub.
+
+  + mkdir -p ~/.cache/code-server
+  + curl -#fL -o ~/.cache/code-server/code-server-4.100.3-amd64.rpm.incomplete -C - https://github.com/coder/code-server/releases/download/v4.100.3/code-server-4.100.3-amd64.rpm
+  + mv ~/.cache/code-server/code-server-4.100.3-amd64.rpm.incomplete ~/.cache/code-server/code-server-4.100.3-amd64.rpm
+  + rpm -U ~/.cache/code-server/code-server-4.100.3-amd64.rpm
+
+  rpm package has been installed.
+
+  To have systemd start code-server now and restart on boot:
+    sudo systemctl enable --now code-server@$USER
+  Or, if you don't want/need a background service you can run:
+    code-server
+
+  Deploy code-server for your team with Coder: https://github.com/coder/coder
+
+
+
+code-server -h
+------------------------
+
+  .. code:
+
+   # code-server -h
+  code-server 4.99.3 c36b2d3edd1cc8db7cfc49f5bc55711e7c5ac928 with Code 1.99.3
+
+  Usage: code-server [options] [path]
+      - Opening a directory: code-server ./path/to/your/project
+      - Opening a saved workspace: code-server ./path/to/your/project.code-workspace
+
+  Options
+        --auth                             The type of authentication to use. [password, none]
+        --password                         The password for password authentication (can only be passed in via $PASSWORD or the config file).
+        --hashed-password                  The password hashed with argon2 for password authentication (can only be passed in via $HASHED_PASSWORD or the config file).
+                                          Takes precedence over 'password'.
+        --cert                             Path to certificate. A self signed certificate is generated if none is provided.
+        --cert-host                        Hostname to use when generating a self signed certificate.
+        --cert-key                         Path to certificate key when using non-generated cert.
+        --disable-telemetry                Disable telemetry.
+        --disable-update-check             Disable update check. Without this flag, code-server checks every 6 hours against the latest github release and
+                                          then notifies you once every week that a new release is available.
+        --disable-file-downloads           Disable file downloads from Code. This can also be set with CS_DISABLE_FILE_DOWNLOADS set to 'true' or '1'.
+        --disable-file-uploads             Disable file uploads.
+        --disable-workspace-trust          Disable Workspace Trust feature. This switch only affects the current session.
+        --disable-getting-started-override Disable the coder/coder override in the Help: Getting Started page.
+        --disable-proxy                    Disable domain and path proxy routes.
+    -h --help                             Show this output.
+        --locale                           Set vscode display language and language to show on the login page, more info see
+                                          https://en.wikipedia.org/wiki/IETF_language_tag
+        --open                             Open in browser on startup. Does not work remotely.
+        --bind-addr                        Address to bind to in host:port. You can also use $PORT to override the port.
+        --config                           Path to yaml config file. Every flag maps directly to a key in the config file.
+        --socket                           Path to.. Jun 06, 2025 (10:22:26) a socket (bind-addr will be ignored).
+        --socket-mode                      File mode of the socket.
+        --trusted-origins                  Disables authenticate origin check for trusted origin. Useful if not able to access reverse proxy configuration.
+    -v --version                          Display version information.
+        --user-data-dir                    Path to the user data directory.
+        --extensions-dir                   Path to the extensions directory.
+        --list-extensions                  List installed VS Code extensions.
+        --force                            Avoid prompts when installing VS Code extensions.
+        --install-extension                Install or update a VS Code extension by id or vsix. The identifier of an extension is `${publisher}.${name}`.
+                                          To install a specific version provide `@${version}`. For example: 'vscode.csharp@1.2.3'.
+        --enable-proposed-api              Enable proposed API features for extensions. Can receive one or more extension IDs to enable individually.
+        --uninstall-extension              Uninstall a VS Code extension by id.
+        --show-versions                    Show VS Code extension versions.
+        --github-auth                      GitHub authentication token (can only be passed in via $GITHUB_TOKEN or the config file).
+        --proxy-domain                     Domain used for proxying ports.
+        --skip-auth-preflight              Allows preflight requests through proxy without authentication.
+    -e --ignore-last-opened               Ignore the last opened directory or workspace in favor of an empty window.
+    -n --new-window                       Force to open a new window.
+    -r --reuse-window                     Force to open a file or folder in an already opened window.
+  -vvv --verbose                          Enable verbose logging.
+    -an --app-name                         The name to use in branding. Will be shown in titlebar and welcome message
+    -w --welcome-text                     Text to show on login page
+        --abs-proxy-base-path              The base path to prefix to all absproxy requests
+  # code-server --list-extensions
+
+
+
+
+
+
+
+    
