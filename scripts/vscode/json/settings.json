@@ -1,0 +1,56 @@
+/* VIM: https://github.com/VSCodeVim/Vim/#key-remapping */
+{
+    "editor.parameterHints.enabled": false,
+    "editor.hover.enabled": false,
+    "editor.quickSuggestions": {
+       "other": false,
+       "comments": false,
+       "strings": false
+    },
+    "editor.suggestOnTriggerCharacters": false,
+    "security.workspace.trust.untrustedFiles": "open",
+    "vim.vimrc.enable": true,
+    "vim.vimrc.path": "c:\\Users\\vkannapp\\.vimrc",
+    "workbench.sideBar.location": "right",
+    "editor.minimap.enabled": false,
+    "explorer.openEditors.visible": 1,
+    "editor.bracketPairColorization.enabled": false,
+    "editor.guides.indentation": false,
+    "editor.tabSize": 8,
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 80,
+    "editor.rulers": 80,
+    "editor.insertSpaces": false,
+    "editor.lineNumbers": "on",
+    "workbench.colorTheme": "Visual Studio Dark - C++",
+    "workbench.preferredDarkColorTheme": "Visual Studio Dark - C++",
+    "workbench.preferredHighContrastColorTheme": 
+        "Visual Studio Dark - C++",
+    "workbench.preferredHighContrastLightColorTheme": 
+        "Visual Studio Dark - C++",
+    "workbench.preferredLightColorTheme": "Visual Studio Dark - C++",
+    "terminal.integrated.macOptionClickForcesSelection": true,
+    "window.density.editorTabHeight": "compact",
+    "files.associations": {
+        "*.txt": "restructuredtext"
+    },
+    "vim.normalModeKeyBindingsNonRecursive": [
+        {
+            "before": ["<S-space"],
+            "commands": ["editor.action.triggerParameterHints"]
+        },
+        {
+            "before":["<C-n>"],
+            "commands": [
+                ":nohl",
+            ]
+        },
+        {
+            "before": ["<C-s>"],
+            "commands": [
+                "workbench.action.files.save",
+            ]
+        }
+    ],
+    "vim.statusBarColors.easymotioninputmode": ""
+}
