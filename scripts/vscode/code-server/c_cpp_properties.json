@@ -1,0 +1,32 @@
+{
+  "configurations": [
+    {
+      "name": "linux-gcc-x64",
+      "includePath": [
+        "${workspaceFolder}/**"
+      ],
+      "forcedInclude": [
+        "${workspaceFolder}/net-next/../linux/include/generated/autoconf.h"
+      ],
+      "defines": [
+        "__KERNEL__",
+        "LINUX",
+        "MODULE"
+      ],
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "${default}",
+      "intelliSenseMode": "linux-gcc-x64",
+      "dotConfig": "${workspaceFolder}/net-next/../linux/.config",
+      "browse": {
+        "path": [
+          "${myIncludePath}",
+          "${workspaceFolder}"
+        ],
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "cppStandard": "${default}"
+    }
+  ],
+  "version": 4,
+  "enableConfigurationSquiggles": true
+}
