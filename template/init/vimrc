@@ -17,6 +17,7 @@ set guifont=*
 set guifont=Courier\ New\ 12
 set encoding=utf-8
 set termencoding=utf-8
+set paste
 
 " c identation
 set cindent
@@ -32,6 +33,9 @@ noremap <Leader>p "*p
 noremap <Leader>Y "+y
 noremap <Leader>P "+p
 
+" Copy Paste from X11 Clipboard
+vmap yy :!xclip -f -sel clip
+map pp mz:-1r !xclip -o -sel clip`z
 
 "trailing spaces
 "match ErrorMsg '\s\+$'
@@ -126,9 +130,11 @@ filetype off " required
 "colorscheme molokai
 
 " Install vundle
-" mkdir ~/.vim/vundle ; cd ~/.vim/vundle
-" git clone https://github.com/VundleVim/Vundle.vim.git Vundle.vim
-" vim ==> :PluginInstall vundle
+" mkdir -p ~/.vim/bundle 
+" git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+" vim +PluginInstall +qall
+
+" #vim ==> :PluginInstall vundle
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -148,8 +154,21 @@ Plugin 'tagbar'
 call vundle#end()            " required
 filetype plugin indent on    " required
 
+" resize windows
+" C-W >/< - inc/dec width (20C-W </>)
+" C-W +/- - inc/dec height
+" C-W = equal width and height of all windows
+
 "tagbar
-nmap <F8> :TagbarToggle<CR>
+nmap <leader>t :TagbarToggle<CR><CR>
+let g:tagbar_compact=1
+let g:tagbar_expand=1
+let g:tagbar_width=40
+" P - Preview in separate window
+" x - zoom out
+" q - quit Tagbar
+" zM  Close all folds
+" zR  Open all folds
 
 " NERDTree
 " CD - Change to cwd
@@ -157,7 +176,7 @@ nmap <F8> :TagbarToggle<CR>
 " X - Close tree nodes
 nnoremap <leader>n :NERDTreeFocus<CR>
 nnoremap <C-n> :NERDTree<CR>
-nnoremap <C-\> :NERDTreeToggle<CR>
+nnoremap <C-\> :NERDTreeToggle<CR><CR>
 nnoremap <C-f> :NERDTreeFind<CR>
 let g:NERDTreeChDirMode = 2
 autocmd VimEnter * NERDTree
@@ -229,6 +248,17 @@ set tabpagemax=25
 set showtabline=2
 " Set tablabel format (see statusline)
 set guitablabel=\[%N\]\%t%M
+
+" Copy current path 
+" path is copied in '+' register
+nnoremap <Leader>c :let @*=expand('%:p')<CR>
+
+nmap th :tabfirst<CR>
+nmap tk :tabnext<CR>
+nmap tj :tabprev<CR>
+nmap tl :tablast<CR>
+nmap td :tabclose<CR>
+nmap te :tabnew<CR>
 
 map ,t <Esc>:tabnew<CR>
 map ,m <Esc>:tabs<CR>

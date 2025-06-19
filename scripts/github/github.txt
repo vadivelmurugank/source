@@ -1,0 +1,155 @@
+----------------------------------------------------------------------------------------------------------------------------------------
+CHECKPATCH - Coding alignment checks
+
+export DIR_ROOT=${HOME}/ORG_ASIC_ROOT
+
+export CHECKPATCH=${DIR_ROOT}/kernel/scripts/checkpatch.pl
+export CHECKPATCH_SCRIPT=${DIR_ROOT}/kernel/arch/powerpc/tools/checkpatch.sh
+
+${CHECKPATCH_SCRIPT} -g  origin/git-trunk HEAD
+
+${CHECKPATCH_SCRIPT} -g  6971c4d640e8f57cefdac97cfbb8fe9f284de407 76133b1c281c6762c7b8a80aaaa868330c107488
+
+git diff git-trunk > ~/fw.patch
+${CHECKPATCH_SCRIPT} --patch ~/fw.patch
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+# Install repo tool
+mkdir -p ~/.bin
+export PATH="${HOME}/.bin:${PATH}"
+curl https://storage.googleapis.com/git-repo-downloads/repo > ~/.bin/repo
+chmod a+rx ~/.bin/repo
+
+
+https://github.com/source/networking.asic.software.repo.bootstrap
+Repository to hold the scripts and source neccessary to create a build environment for the ORG Infrastructure Processing Unit ROOT
+
+https://wiki/ASIC+ROOT+HOW+TOs
+
+
+#repo init -u https://github.com/source/networking.asic.manifests -b git-trunk -m default.xml -g all
+
+https://github.com/source/firmware.ethernet.fw.git
+
+git clone -b git-trunk  https://github.com/source/firmware.ethernet.git mod
+#git checkout git-trunk
+git pull --rebase
+git checkout -b dev/user 
+git add -A
+git commit -m "Enable header"
+git push -u origin dev/user
+git rev-parse HEAD
+git log -1
+
+git clone -b git-trunk https://github.com/source/firmware.ethernet.mgmt.mgmt-shared.git mgmt-shared
+git pull --rebase
+
+
+git clone -b dev https://github.com/source/drivers.ethernet.linux.control.git control
+git pull --rebase
+
+
+# Squash the commits
+git reflog
+git rebase -i HEAD~2
+
+Code
+
+    pick <hash1> Commit message 1
+    squash <hash2> Commit message 2
+
+git commit --amend
+
+git push --force origin <branch_name>
+
+# install git large file system
+apt install git-lfs
+dnf -y install git-lfs
+
+# curl https://storage.googleapis.com/git-repo-downloads/repo > repo
+
+
+#1. Repo 
+SHA_ID=<from manifest.xml file for the release>
+repo init -u https://github.com/source/networking.asic.manifests.git -b <SHAID from manifest.xml file> -m default.xml -g all
+repo --event-log=log_sync.json  sync --nmu -j 4 -c --fail-fast
+
+
+    # change asic-repo revision to latest
+    repo diffmanifests git-trunk/manifest.xml.org git-trunk/manifest.xml
+
+    repo init -m manifest.xml
+    repo sync
+
+    systemctl show --no-pager --property=Environment
+    systemctl status --no-pager docker
+    docker system df
+    docker ps -a
+    docker image ls -a
+    docker image prune -a -f
+    docker container rm $(docker container ls -aq)
+    # All dangling images none:none
+    ids=$(docker images -f  dangling=true -q) ; if ! [ "X" == "X$ids" ]  ; then  echo "X $ids" ; docker rmi -f $ids ; fi
+    ids=$(docker images -a  -q) ; if ! [ "X" == "X$ids" ]  ; then  echo "X $ids" ; docker rmi -f $ids ; fi
+    docker images -a
+
+
+    systemctl daemon-reload
+    systemctl restart containerd
+    systemctl restart docker
+    docker -v
+    docker login
+    docker run hello-world
+    docker image ls -a
+    docker run --rm --privileged multiarch/qemu-user-static --reset -p yes -c yes
+    docker images 
+    docker system df
+    docker network ls
+    for netid in $(docker network ls -q)  ; do docker network inspect $netid | jq ".[0].IPAM.Config" ; done
+
+
+    mkdir -p myrepo
+    cp manifest.xml .
+    cd  myrepo
+    git init ; git add manifest.xml ; git commit -m "my repo"
+
+    repo init -u . -m manifest.xml -g all
+    repo --event-log=log_sync.json  sync --nmu -j 4 -c --fail-fast
+
+    #####################
+    # Create Patch
+
+        https://github.com/source/networking.asic.asic-repo/commit/11e704295b6612c017dfb92414e6f99a587128d6
+
+        # git format-patch
+        [ git-release]$git -C /data/source/git-release/.repo/projects/repo.git describe 11e7042
+
+        [ git-release]$git -C /data/source/git-release/.repo/projects/repo.git format-patch -1 11e7042
+        0001-To-ensure-all-necessary-hwconf-files-are-copied-to-e.patch
+
+        cp /data/source/git-release/.repo/projects/repo.git/0001-To-ensure-all-necessary-hwconf-files-are-copied-to-e.patch ~/
+
+        # Diff from previous commit
+        $git -C /data/source/git-release/.repo/projects/repo.git diff  11e7042 9aec53a
+
+        cd git-0.9.1-Source-Code-ROOT/ORG_ASIC_ROOT-0.9.1/ORG_ASIC_ROOT
+        patch -p1 --dry-run -i /root/0001-To-ensure-all-necessary-hwconf-files-are-copied-to-e.patch
+        patch -p1 -i /root/0001-To-ensure-all-necessary-hwconf-files-are-copied-to-e.patch
+
+        patch -p1 --dry-run << 'PATCH_EOF'
+
+        patch -p1 << 'PATCH_EOF'
+        ...
+        ...
+        EOF
+
+
+    dfiles=$(find . -name "*.org" -type f | sed 's/.org//g')
+    for dfile in ${dfiles} ; do diff -q ${dfile}.org ${dfile} ; done
+
+    # diff -ruNp
+    for dfile in ${dfiles} ; do diff -ruNp ${dfile}.org ${dfile} ; done
+
+    for dfile in ${dfiles} ; do diff -ruNp ${dfile}.org ${dfile} ; done > /root/tw_changes.txt

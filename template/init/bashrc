@@ -141,7 +141,7 @@ function gdiffbkp()
 ############
 
 #setting PATH Variable
-export PATH=${HOME}/bin:$PATH
+export PATH=${HOME}/WORK/bin:$PATH
 
 
 # export custom pythonpath
@@ -202,6 +202,10 @@ alias tre='tree -l -L 1'
 # email < file
 alias email='sendmail vadivel@email.com'
 
+#networking alias
+alias ipa='ip -br a'
+alias ipl='ip -br l'
+alias ipn='ip -br neigh'
 
 alias cscope='cscope -p4 -dq'
 #alias cscope='export CSCOPE_DB=/scartch/51/evadkan/cscope/cscope.out;cscope -p4 -dq'
@@ -461,18 +465,6 @@ alias runjenkinsasic='java -Xms1336m -Xmx1336m -DJENKINS_HOME=/home/evadkan/jenk
 #  find /ws/rajasiva-sjc/ -name "tags" -type l -maxdepth 5 -exec ls -l {} \; | sort -n
 #
 
-## ACL
-# tasaxena-lnx1.cisco.com
-# tasaxena
-# /nobackup/tasaxena/ptp_75_2_j/x3.diff
-
-
-# sjc-ads-275 : /nobackup/sugan
-# sjc-ads-4107 : /nobackup/sayadlap
-#sjc-ads-4908:/nobackup/kkomarag/tree/BUG_TREES/Fretta_J2/jdb_124
-
-
-
 #===========================================
 # Cross Compile
 #===========================================
@@ -480,14 +472,7 @@ alias runjenkinsasic='java -Xms1336m -Xmx1336m -DJENKINS_HOME=/home/evadkan/jenk
 alias lgcc='${HOME}/bin/compile.sh'
 
 alias acmediff='acme diff -cmd tkdiff -opts w ' 
-#export ACME_DIFF_CMD=/usr/cisco/bin/tkdiff ; export ACME_DIFF_OPTS="";  export ACME_DIFF_TO_BACKGROUND=1
-
-# Web Page
-# https://wwwin-people.cisco.com/Help/create.html
-
-# people.cisco.com
-# /auto/wwwPeople/vakannap
-
+#export ACME_DIFF_CMD=/usr/bin/tkdiff ; export ACME_DIFF_OPTS="";  export ACME_DIFF_TO_BACKGROUND=1
 
 # eclipse
 #eclipse installer: /auto/dc3/vakannap/downloads/eclipse-installer
@@ -495,7 +480,7 @@ alias acmediff='acme diff -cmd tkdiff -opts w '
 #    -Duser.home=/auto/wit/.eclipse
 #    -Doomph.setup.user.home.redirect=true
 #    -Doomph.setup.install.root=/auto/wit/.eclipse
-export PATH=${PATH}:/auto/wit/.eclipse/parallel-2020-12/eclipse
+#export PATH=${PATH}:/auto/wit/.eclipse/parallel-2020-12/eclipse
 # egit eclipse plugin
 
 
