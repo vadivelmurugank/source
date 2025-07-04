@@ -14,6 +14,29 @@ git diff git-trunk > ~/fw.patch
 ${CHECKPATCH_SCRIPT} --patch ~/fw.patch
 
 
+--------------------
+
+
+gh auth setup-git
+gh auth status
+gh auth login
+
+$gh auth login
+
+? Where do you use GitHub? GitHub.com
+? What is your preferred protocol for Git operations on this host? HTTPS
+? Authenticate Git with your GitHub credentials? Yes
+? How would you like to authenticate GitHub CLI? Login with a web browser
+
+! First copy your one-time code: B8A1-C70D
+Press Enter to open https://github.com/login/device in your browser...
+✓ Authentication complete.
+- gh config set -h github.com git_protocol https
+✓ Configured git protocol
+✓ Logged in as 
+! You were already logged in to this account
+
+
 ----------------------------------------------------------------------------------------------------------------------------------------
 
 # Install repo tool
